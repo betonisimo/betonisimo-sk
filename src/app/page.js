@@ -3,12 +3,25 @@ import Hero from "@/components/home/Hero";
 import About from "@/components/home/About";
 import Services from "@/components/home/Services";
 import Reviews from "@/components/home/Reviews";
-import { getContent, getCollections } from "@/actions/adminActions"; // Объединил импорты для красоты
+import { getContent, getCollections } from "@/actions/adminActions"; 
 import StyleGrid from "@/components/home/StyleGrid";
 import PortfolioPreview from "@/components/home/PortfolioPreview";
-export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600; 
+
+export const metadata = {
+  title: "Prémiové betónové ploty na kľúč | Beton-SK",
+  description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn.",
+  alternates: {
+    canonical: "https://beton-sk.vercel.app/", 
+  },
+};
+
 export default async function Home() {
-  const recentProjects = await prisma.project.findMany({ take: 6, orderBy: { createdAt: 'desc' } });
+  const recentProjects = await prisma.project.findMany({ 
+    take: 6, 
+    orderBy: { createdAt: 'desc' } 
+  });
   const collections = await getCollections();
   const aboutData = await getContent("domov", "domov-o-nas");
   const servicesData = await getContent("domov", "domov-sluzby");
@@ -27,7 +40,6 @@ export default async function Home() {
       <PortfolioPreview projects={recentProjects} />
       <About editMode={false} dbData={aboutData || undefined} />
       <Services editMode={false} dbData={servicesData || undefined} />
-      {/* Теперь передаем всё в отзывы */}
       <Reviews 
         editMode={false} 
         dbData={reviewsData || undefined}

@@ -8,7 +8,7 @@ export default function StyleGrid({ collections }) {
   return (
     <section className="py-24 lg:py-40 bg-[#f8fafc] border-b border-slate-200 font-sans" id="kolekcie">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
-        
+
         {/* HEADER */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-20 border-l-4 border-[#dc2626] pl-8">
           <div className="max-w-3xl">
@@ -31,24 +31,23 @@ export default function StyleGrid({ collections }) {
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {collections.map((col, idx) => (
-            <div 
-              key={col.id} 
+            <div
+              key={col.id}
               // Строгий радиус 2px, тень при наведении, бордер НЕ МЕНЯЕТСЯ
               className="bg-white flex flex-col border border-slate-200 rounded-[2px] transition-shadow duration-500 hover:shadow-2xl group relative overflow-hidden"
             >
               {/* IMAGE AREA */}
               <div className="relative aspect-[4/5] bg-slate-900 rounded-t-[2px] overflow-hidden">
-                <img 
-                  src={col.mainImage || '/uploads/default.webp'} 
-                  alt={col.title}
+                <img
+                  src={col.mainImage || '/uploads/default.webp'}
+                  alt={`Betónový plot - kolekcia ${col.title}`}
                   loading="lazy"
-                  /* Добавил !grayscale-0 для жесткого форсирования цвета */
                   className="w-full h-full object-cover filter grayscale transition-all duration-700 ease-in-out group-hover:!grayscale-0 group-hover:scale-110"
                 />
-                
+
                 {/* ОВЕРЛЕЙ: При наведении opacity падает до 30% (или даже 0%), чтобы цвет был 100% чистым */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/10 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
-                
+
                 {/* ID MARKER */}
                 <div className="absolute top-6 left-6 text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm z-10 transition-colors duration-500 group-hover:bg-red-600/90 group-hover:text-white">
                   LN_0{idx + 1}
@@ -64,7 +63,7 @@ export default function StyleGrid({ collections }) {
                   </p>
                 </div>
               </div>
-              
+
               {/* CONTENT AREA */}
               <div className="p-6 md:p-8 flex flex-col flex-1 bg-white relative z-10">
                 <ul className="space-y-4 mb-8 flex-1">
@@ -77,16 +76,16 @@ export default function StyleGrid({ collections }) {
                     </li>
                   ))}
                 </ul>
-                
+
                 {/* КНОПКА */}
-                <Link 
-                  href={`/kolekcia/${col.slug}`} 
+                <Link
+                  href={`/kolekcia/${col.slug}`}
                   className="group/btn flex items-center justify-between pt-5 border-t border-slate-100 text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 hover:text-[#dc2626] transition-colors duration-300"
                 >
                   Zobraziť detaily
-                  <ArrowUpRight 
-                    size={16} 
-                    className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform duration-300" 
+                  <ArrowUpRight
+                    size={16}
+                    className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform duration-300"
                   />
                 </Link>
               </div>

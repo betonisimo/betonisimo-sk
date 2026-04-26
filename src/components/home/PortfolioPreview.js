@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import { MapPin, ArrowUpRight } from "lucide-react";
 
@@ -43,7 +42,6 @@ export default function PortfolioPreview({ projects }) {
             <Link 
               href={`/projekt/${project.slug}`} 
               key={project.id} 
-              // Строгий радиус 2px, без бордера, с тенью при наведении
               className="group relative bg-[#050505] rounded-[2px] transition-shadow duration-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.1)] overflow-hidden flex flex-col"
             >
               {/* ТЕХНИЧЕСКИЙ ИНДЕКС */}
@@ -56,18 +54,19 @@ export default function PortfolioPreview({ projects }) {
                 <ArrowUpRight size={24} className="text-[#dc2626]" />
               </div>
 
-              {/* ИЗОБРАЖЕНИЕ (Анимация 800ms) */}
+              {/* ИЗОБРАЖЕНИЕ */}
               <div className="relative aspect-[4/5] bg-neutral-900 overflow-hidden rounded-[2px]">
                 <img
                   src={project.mainImage}
-                  alt={project.title}
+                  // СУПЕР SEO-ХАК ДЛЯ ЛОКАЛЬНЫХ КЛИЕНТОВ:
+                  alt={`Betónový plot ${project.location ? 'montáž ' + project.location : ''} - ${project.title}`}
                   loading="lazy"
                   className="w-full h-full object-cover filter grayscale scale-100 transition-all duration-[800ms] ease-in-out group-hover:!grayscale-0 group-hover:scale-110"
                 />
-                {/* ТЕМНЫЙ ГРАДИЕНТ - исчезает при наведении для чистого цвета */}
+                
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 transition-opacity duration-[800ms] group-hover:opacity-30 pointer-events-none"></div>
                 
-                {/* ИНФО О ПРОЕКТЕ (поверх картинки, как в твоем исходнике) */}
+                {/* ИНФО О ПРОЕКТЕ */}
                 <div className="absolute bottom-8 left-6 right-6 space-y-4 z-10 pointer-events-none">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-px bg-[#dc2626]"></div>
@@ -76,12 +75,14 @@ export default function PortfolioPreview({ projects }) {
                     </span>
                   </div>
                   
-                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter leading-none group-hover:-translate-y-1 transition-transform duration-500">
+                  {/* ПОМЕНЯЛИ h4 НА h3 ДЛЯ ПРАВИЛЬНОЙ SEO-ИЕРАРХИИ */}
+                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none group-hover:-translate-y-1 transition-transform duration-500">
                     {project.title}
-                  </h4>
+                  </h3>
 
                   <div className="flex items-center text-white/50 text-[10px] font-black uppercase tracking-widest gap-2 pt-2">
                     <MapPin size={12} className="text-[#dc2626]" />
+                    {/* Локация остается видимой для пользователей */}
                     {project.location}
                   </div>
                 </div>

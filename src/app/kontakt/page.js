@@ -1,15 +1,10 @@
 import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
 
-export default async function KontaktPage({ searchParams }) {
-  // Ожидаем параметры поиска
-  const params = await searchParams;
-  const isEdit = params.edit === "true";
-
-  // Загружаем данные из БД. Используем те же ключи, что и в KontaktClient
+export default async function KontaktPage() {
+  // Загружаем данные из БД
   const dbData = await getContent("kontakt", "informacie");
 
-  // Обновленный объект по умолчанию с полями видимости (show_...)
   const defaultData = {
     firma: "BART Complex s.r.o.",
     show_firma: true,
@@ -25,13 +20,14 @@ export default async function KontaktPage({ searchParams }) {
     show_tel: true,
     email: "info@beton-plotysk.sk",
     show_email: true,
-    map_link: "https://www.google.com/maps/embed?pb=...", // добавь актуальную ссылку
+    map_link: "", 
     show_map: true
   };
 
   return (
+    // editMode ВСЕГДА false для обычных посетителей
     <KontaktClient 
-      editMode={isEdit} 
+      editMode={false} 
       initialData={dbData || defaultData} 
     />
   );

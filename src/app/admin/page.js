@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
       title: "Kontakt",
       desc: "Zmena telefónnych čísiel, adries a fakturačných údajov",
       icon: <Phone size={24} />,
-      href: "/kontakt?edit=true",
+      href: "/admin/kontakt",
       color: "bg-red-500"
     }
   ];
