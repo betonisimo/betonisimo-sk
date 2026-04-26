@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { getContent } from "@/actions/adminActions";
 import { Mail, Phone, MapPin, Globe } from "lucide-react";
+
 export const dynamic = 'force-dynamic';
+
 const FacebookIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
 );
@@ -12,19 +14,38 @@ const InstagramIcon = () => (
 
 export default async function Footer() {
   const footerData = await getContent("global", "footer");
-  console.log("--- FOOTER DEBUG START ---");
-  console.log("RAW DATA FROM DB:", JSON.stringify(footerData, null, 2));
-  console.log("--- FOOTER DEBUG END ---");
-  const d = footerData || {
-    firma: "BART Complex s.r.o.", show_firma: true,
-    adresa: "Novojelčanská 845/63 925 23 Jelka", show_adresa: true,
-    ico: "51921979", dic: "2120839974", icdph: "SK2120839974", show_billing: true,
-    email1: "info@beton-plotysk.sk", show_email: true,
-    tel: "0911 640 097", show_tel: true,
-    fb_link: "https://www.facebook.com/bartcomplex", show_fb: true,
-    ig_link: "https://www.facebook.com/bartcomplex", show_ig: true,
+
+  // 1. Дефолтные данные (эталон)
+  const defaults = {
+    firma: "BETONISSIMO.SK", 
+    show_firma: true,
+    adresa: "-", 
+    show_adresa: true,
+    ico: "50918753", 
+    dic: "3120539851", 
+    icdph: "-", 
+    show_billing: true,
+    show_ico: true, 
+    show_dic: true, 
+    show_icdph: true,
+    email1: "betonisimo.sk@gmail.com", 
+    show_email: true,
+    tel: "0911 640 097", 
+    show_tel: true,
+    fb_link: "https://www.facebook.com/p/Betonissimosk-61577610401731/", 
+    show_fb: true,
+    ig_link: "https://www.instagram.com/betonissimo.sk", 
+    show_ig: true,
     show_widget: true
   };
+
+  // 2. СЛИЯНИЕ: Берем дефолты и накладываем сверху данные из БД
+  // Это решит проблему отсутствующих ключей (как show_billing)
+  const d = { ...defaults, ...(footerData || {}) };
+
+  console.log("--- FOOTER DEBUG START ---");
+  console.log("FINAL MERGED DATA:", JSON.stringify(d, null, 2));
+  console.log("--- FOOTER DEBUG END ---");
 
   return (
     <footer className="bg-black text-white border-t border-neutral-900 font-sans">
@@ -43,11 +64,13 @@ export default async function Footer() {
                     {d.adresa}
                   </p>
                 )}
+                
+                {/* Секция фактурации теперь защищена от отсутствия show_billing */}
                 {d.show_billing && (
                   <div className="pt-4 border-t border-neutral-900 space-y-1 font-mono text-[10px]">
-                    {d.show_ico && <p>IČO: {d.ico}</p>}
-                    {d.show_dic && <p>DIČ: {d.dic}</p>}
-                    {d.show_icdph && <p>IČ DPH: {d.icdph}</p>}
+                    {d.show_ico && d.ico && <p>IČO: {d.ico}</p>}
+                    {d.show_dic && d.dic && <p>DIČ: {d.dic}</p>}
+                    {d.show_icdph && d.icdph && <p>IČ DPH: {d.icdph}</p>}
                   </div>
                 )}
               </div>
@@ -70,7 +93,7 @@ export default async function Footer() {
                     </a>
                   )}
                   {d.show_tel && (
-                    <a href={`tel:${d.tel.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-xl font-black tracking-tighter text-white hover:text-white transition-none cursor-pointer">
+                    <a href={`tel:${d.tel?.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-xl font-black tracking-tighter text-white hover:text-white transition-none cursor-pointer">
                       <Phone size={20} className="text-[#dc2626]" /> {d.tel}
                     </a>
                   )}
@@ -101,7 +124,7 @@ export default async function Footer() {
           )}
 
           {/* FB WIDGET */}
-          {d.show_widget && (
+          {d.show_widget && d.fb_link && (
             <div className="space-y-6">
               <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Facebook Feed</h4>
               <div className="bg-neutral-900 border border-neutral-800 p-1 rounded-[2px] overflow-hidden grayscale">
@@ -120,7 +143,7 @@ export default async function Footer() {
 
         <div className="pt-12 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[9px] font-mono text-slate-600 uppercase tracking-widest text-center md:text-left leading-relaxed">
-            © 2020 - {new Date().getFullYear()} Elite Industrial <br />
+            © 2020 - {new Date().getFullYear()} BETONISSIMO.SK <br />
             Architectural Concrete Solutions
           </p>
         </div>
