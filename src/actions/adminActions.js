@@ -28,6 +28,7 @@ export async function saveContent(stranka, sekcia, obsah) {
     revalidatePath("/admin/editor");
     revalidatePath("/kontakt");
     revalidatePath("/admin/kontakt");
+    revalidatePath("/", "layout");
 
     return { success: true, data: updated };
   } catch (error) {
