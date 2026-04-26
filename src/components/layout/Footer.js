@@ -12,7 +12,9 @@ const InstagramIcon = () => (
 
 export default async function Footer() {
   const footerData = await getContent("global", "footer");
-
+  console.log("--- FOOTER DEBUG START ---");
+  console.log("RAW DATA FROM DB:", JSON.stringify(footerData, null, 2));
+  console.log("--- FOOTER DEBUG END ---");
   const d = footerData || {
     firma: "BART Complex s.r.o.", show_firma: true,
     adresa: "Novojelčanská 845/63 925 23 Jelka", show_adresa: true,
