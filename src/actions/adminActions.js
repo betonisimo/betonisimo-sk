@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { put } from '@vercel/blob';
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
+
 /**
  * СОХРАНЕНИЕ ОБЩЕГО КОНТЕНТА (Hero, Footer, About и т.д.)
  */
 export async function saveContent(stranka, sekcia, obsah) {
   const session = await getServerSession();
-  if (!session) {
-    throw new Error("Unauthorized access! Nice try.");
-  }
+  if (!session) throw new Error("Unauthorized access! Nice try.");
+
   try {
     const updated = await prisma.strankaObsah.upsert({
       where: { sekcia: sekcia },
@@ -26,6 +26,8 @@ export async function saveContent(stranka, sekcia, obsah) {
     // Сбрасываем кэш, чтобы изменения были видны мгновенно
     revalidatePath("/");
     revalidatePath("/admin/editor");
+    revalidatePath("/kontakt");
+    revalidatePath("/admin/kontakt");
 
     return { success: true, data: updated };
   } catch (error) {
@@ -36,17 +38,18 @@ export async function saveContent(stranka, sekcia, obsah) {
 
 /**
  * ЭКШЕН ДЛЯ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ (Vercel Blob)
- * Именно эту функцию ищет твой HeroEditor
  */
 export async function uploadImageAction(formData) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized: Only admins can upload images.");
+
   try {
     const file = formData.get('file');
     if (!file) throw new Error("Súbor nebol nájdený");
 
-    // Отправляем файл в облако Vercel
     const blob = await put(file.name, file, { 
       access: 'public',
-      addRandomSuffix: true // Добавит случайные символы к названию, чтобы избежать дублей
+      addRandomSuffix: true
     });
 
     return { success: true, url: blob.url };
@@ -57,7 +60,7 @@ export async function uploadImageAction(formData) {
 }
 
 /**
- * ПОЛУЧЕНИЕ КОНТЕНТА
+ * ПОЛУЧЕНИЕ КОНТЕНТА (Оставляем открытым для посетителей)
  */
 export async function getContent(stranka, sekcia) {
   try {
@@ -74,7 +77,7 @@ export async function getContent(stranka, sekcia) {
 /**
  * КОЛЛЕКЦИИ (СТИЛИ)
  */
-export async function getCollections() {
+export async function getCollections() { // Открыто для посетителей
   try {
     return await prisma.collection.findMany({ orderBy: { id: 'asc' } });
   } catch (error) {
@@ -83,6 +86,9 @@ export async function getCollections() {
 }
 
 export async function createCollection(data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     const baseSlug = data.title
       .normalize("NFD")
@@ -110,6 +116,9 @@ export async function createCollection(data) {
 }
 
 export async function updateCollection(id, data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     const updated = await prisma.collection.update({
       where: { id: Number(id) },
@@ -129,6 +138,9 @@ export async function updateCollection(id, data) {
 }
 
 export async function deleteCollection(id) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     await prisma.collection.delete({ where: { id: Number(id) } });
     revalidatePath("/");
@@ -142,6 +154,9 @@ export async function deleteCollection(id) {
  * ПРОЕКТЫ (РЕАЛИЗАЦИИ)
  */
 export async function createProject(data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     const baseSlug = data.title
       .normalize("NFD")
@@ -171,6 +186,9 @@ export async function createProject(data) {
 }
 
 export async function updateProject(id, data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
 
@@ -188,6 +206,9 @@ export async function updateProject(id, data) {
 }
 
 export async function deleteProject(id) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     await prisma.project.delete({ where: { id: Number(id) } });
     revalidatePath("/realizacie");
@@ -199,6 +220,9 @@ export async function deleteProject(id) {
 
 // Удаление всех коллекций
 export async function deleteAllCollectionsAction() {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
   try {
     await prisma.collection.deleteMany({});
     revalidatePath("/");

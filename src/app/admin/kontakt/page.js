@@ -2,7 +2,7 @@ import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-
+export const dynamic = 'force-dynamic';
 export default async function AdminKontaktPage() {
   const dbData = await getContent("kontakt", "informacie");
 

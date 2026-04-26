@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   if (!collection) return { title: "Kolekcia nenájdená | Beton-SK" };
 
   // SEO-Заголовок с ключевыми словами
-  const title = `Betónový plot: Kolekcia ${collection.title} | Beton-SK`;
+  const title = `Kolekcia: ${collection.title} | BETONISSIMO.SK`;
   
   // Описание для Google (до 160 символов)
   const description = collection.description?.substring(0, 155) + "..." || `Objavte našu prémiovú kolekciu betónových plotov ${collection.title}. ${collection.subtitle}. Kvalita a dizajn, ktorý vydrží.`;

@@ -15,8 +15,7 @@ export async function generateMetadata({ params }) {
 
   // Формируем SEO-заголовок, учитывающий локацию (Город)
   const locationText = project.location ? `v meste ${project.location}` : "na Slovensku";
-  const title = `Realizácia: ${project.title} ${locationText} | Beton-SK`;
-  
+  const title = `Realizácia: ${project.title} | BETONISSIMO.SK`;  
   // Обрезаем описание для Google (макс 160 символов)
   const description = project.description?.substring(0, 155) + "..." || `Pozrite si našu najnovšiu realizáciu betónového plotu ${locationText}. Prémiová kvalita a rýchla montáž.`;
 

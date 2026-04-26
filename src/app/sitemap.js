@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://beton-sk.vercel.app";
+  // src/app/sitemap.js
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
 
   try {
     // Безопасный запрос: просим только slug (он точно есть в базе)

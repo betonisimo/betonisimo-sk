@@ -20,7 +20,7 @@ export async function sendContactEmail(formData) {
       // Пока домен не подтвержден, Resend разрешает отправлять только с этого адреса:
       from: 'Web Dopyt <onboarding@resend.dev>', 
       // Впиши сюда СВОЮ почту, на которую хочешь получать письма:
-      to: ['david.riaboshapka@gmail.com'], 
+      to: ['betonisimo.sk@gmail.com'], 
       subject: `Nová správa od: ${name}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">

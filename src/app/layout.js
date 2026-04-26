@@ -14,11 +14,11 @@ const inter = Inter({
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://beton-sk.vercel.app";
 
 // POKROČILÉ SEO METADÁTA
+// src/app/layout.js
 export const metadata = {
-  metadataBase: new URL(baseUrl),
   title: {
-    default: "Prémiové betónové ploty na kľúč | Beton-SK",
-    template: "%s | Beton-SK" // Ak vytvoríš stránku "Kontakt", bude sa volať "Kontakt | Beton-SK"
+    default: "BETONISSIMO.SK | Prémiové betónové ploty",
+    template: "%s | BETONISSIMO.SK"
   },
   description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn a ploty, ktoré vydržia generácie.",
   keywords: ["betónové ploty", "ploty na kľúč", "montáž plotov", "betónový plot cena", "oplotenie pozemku", "BART Complex s.r.o.", "Jelka", "Slovensko"],
