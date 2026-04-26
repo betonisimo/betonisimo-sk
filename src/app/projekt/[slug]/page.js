@@ -55,7 +55,7 @@ export default async function ProjectPage({ params }) {
     "@type": "CreativeWork",
     "name": project.title,
     "description": project.description,
-    "image": project.mainImage || "https://beton-sk.vercel.app/og-image.jpg",
+    "image": project.mainImage || "https://betonissimo.sk/og-image.jpg",
     "creator": {
       "@type": "Organization",
       "name": "BART Complex s.r.o."

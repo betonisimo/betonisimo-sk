@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 // ZÁKLADNÁ URL (Dôležité pre správne fungovanie obrázkov na sociálnych sieťach)
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://beton-sk.vercel.app";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
 
 // POKROČILÉ SEO METADÁTA
 // src/app/layout.js

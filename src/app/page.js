@@ -13,7 +13,7 @@ export const metadata = {
   title: "Prémiové betónové ploty na kľúč | Beton-SK",
   description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn.",
   alternates: {
-    canonical: "https://beton-sk.vercel.app/", 
+    canonical: "https://betonissimo.sk/", 
   },
 };
 

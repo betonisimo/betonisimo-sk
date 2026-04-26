@@ -61,7 +61,7 @@ export default async function CollectionPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": `Betónový plot - Kolekcia ${collection.title}`,
-    "image": collection.mainImage || "https://beton-sk.vercel.app/og-image.jpg",
+    "image": collection.mainImage || "https://betonissimo.sk/og-image.jpg",
     "description": collection.description,
     "brand": {
       "@type": "Brand",

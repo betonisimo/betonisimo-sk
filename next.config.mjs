@@ -4,7 +4,14 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        // МЕНЯЕМ НА ЭТОТ (твой новый актуальный домен блоба):
+        // Твой "старый" хост (из ошибки):
+        hostname: 'qpnfati7bqe4yjvy.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        // Твой "новый" хост (который мы добавляли ранее):
         hostname: 'pvulhvwjkkixdqbl.public.blob.vercel-storage.com',
         port: '',
         pathname: '/**',
