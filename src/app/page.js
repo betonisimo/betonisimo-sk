@@ -8,7 +8,7 @@ import StyleGrid from "@/components/home/StyleGrid";
 import PortfolioPreview from "@/components/home/PortfolioPreview";
 
 export const revalidate = 3600; 
-
+export const dynamic = 'force-dynamic';
 export const metadata = {
   title: "Prémiové betónové ploty na kľúč | Beton-SK",
   description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn.",
