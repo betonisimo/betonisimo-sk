@@ -30,7 +30,7 @@ export const metadata = {
     type: "website",
     locale: "sk_SK",
     url: baseUrl,
-    title: "Prémiové betónové ploty na kľúč | Beton-SK",
+    title: "BETTONISSIMO - Betónové ploty a záhradné doplnky | Kvalita a dizajn pre váš domov",
     description: "Najlepšie betónové ploty na Slovensku. Od zamerania až po profesionálnu montáž.",
     siteName: "Beton-SK",
     images: [
