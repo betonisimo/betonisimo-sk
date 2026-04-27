@@ -58,7 +58,7 @@ export default async function EditorPage() {
               <>
                 <DeleteAllCollectionsBtn />
                 <a href="/admin/collections/new" className="px-8 py-4 bg-[#dc2626] text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all duration-300 rounded-[2px] shadow-lg">
-                  + Nová kolekcia
+                  + Novy katalog
                 </a>
               </>
             }

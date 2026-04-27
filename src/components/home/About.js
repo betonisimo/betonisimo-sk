@@ -58,7 +58,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
   };
 
   return (
-    <section id="onas" className={`py-24 lg:py-40 bg-white overflow-hidden relative border-t border-slate-200 font-sans ${editMode ? 'ring-2 ring-inset ring-[#dc2626]' : ''}`}>
+    <section id="onas" className={`py-24 lg:py-40 bg-white overflow-hidden relative border-t border-slate-200 font-sans ${editMode ? ' ring-inset ring-[#dc2626]' : ''}`}>
       
       {/* ПЛАШКА АДМИНА */}
       {editMode && (

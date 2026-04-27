@@ -43,10 +43,6 @@ export default async function Footer() {
   // Это решит проблему отсутствующих ключей (как show_billing)
   const d = { ...defaults, ...(footerData || {}) };
 
-  console.log("--- FOOTER DEBUG START ---");
-  console.log("FINAL MERGED DATA:", JSON.stringify(d, null, 2));
-  console.log("--- FOOTER DEBUG END ---");
-
   return (
     <footer className="bg-black text-white border-t border-neutral-900 font-sans">
       <div className="max-w-[1400px] mx-auto px-6 pt-24 pb-12">

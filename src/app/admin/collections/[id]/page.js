@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
-
-// 1. ИМПОРТИРУЕМ НАШ НОВЫЙ КОМПОНЕНТ
-import ImagePicker from "@/components/admin/ImagePicker"; 
+import GalleryPicker from "@/components/admin/GalleryPicker"; // ИМПОРТ НОВОГО КОМПОНЕНТА
 
 export default async function EditCollectionPage({ params }) {
   const resolvedParams = await params;
@@ -16,19 +14,19 @@ export default async function EditCollectionPage({ params }) {
     where: { id: Number(id) }
   });
 
-  if (!collection) return <div>Kolekcia nebola nájdená</div>;
+  if (!collection) return <div>katalog nebol nájdeni</div>;
 
   async function handleSave(formData) {
     "use server";
     const data = {
       title: formData.get("title"),
       subtitle: formData.get("subtitle"),
-      mainImage: formData.get("mainImage"), // Данные придут из скрытого поля ImagePicker
+      gallery: formData.get("gallery"), // БЕРЕМ СТРОКУ ИЗ GALLERY PICKER
       description: formData.get("description"),
     };
     await updateCollection(id, data);
     revalidatePath("/admin/editor");
-    revalidatePath(`/kolekcia/${collection.slug}`);
+    revalidatePath(`/katalog/${collection.slug}`);
     redirect("/admin/editor#kolekcie");
   }
 
@@ -39,8 +37,13 @@ export default async function EditCollectionPage({ params }) {
     redirect("/admin/editor#kolekcie");
   }
 
+  // Подготавливаем картинки: если есть массив, берем его, иначе берем mainImage как первый элемент
+  const defaultGallery = collection.gallery?.length > 0 
+    ? collection.gallery 
+    : (collection.mainImage ? [collection.mainImage] : []);
+
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans text-black">
       <div className="max-w-3xl mx-auto">
         <Link href="/admin/editor#kolekcie" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 font-medium transition-colors">
           <ArrowLeft size={20} /> Späť do editora
@@ -49,8 +52,11 @@ export default async function EditCollectionPage({ params }) {
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <form action={handleSave}>
             
-            {/* 2. ИСПОЛЬЗУЕМ КОМПОНЕНТ КАРТИНКИ */}
-            <ImagePicker defaultValue={collection.mainImage} />
+            {/* ИСПОЛЬЗУЕМ НОВЫЙ GALLERY PICKER С ДАННЫМИ ИЗ БАЗЫ */}
+            <div className="border-b border-slate-200 bg-slate-50 p-6">
+               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">Galéria obrázkov</label>
+               <GalleryPicker defaultImages={defaultGallery} />
+            </div>
 
             <div className="p-8 md:p-12 space-y-6">
               <div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
@@ -67,7 +73,7 @@ export default async function EditCollectionPage({ params }) {
                     name="title" 
                     defaultValue={collection.title} 
                     required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-amber-500 transition-all outline-none" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 transition-all outline-none" 
                   />
                 </div>
 
@@ -77,7 +83,7 @@ export default async function EditCollectionPage({ params }) {
                     name="subtitle" 
                     defaultValue={collection.subtitle} 
                     required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-amber-500 transition-all outline-none" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 transition-all outline-none" 
                   />
                 </div>
 
@@ -88,7 +94,7 @@ export default async function EditCollectionPage({ params }) {
                     defaultValue={collection.description} 
                     required
                     rows={8} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-amber-500 transition-all outline-none" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 transition-all outline-none" 
                   />
                 </div>
               </div>

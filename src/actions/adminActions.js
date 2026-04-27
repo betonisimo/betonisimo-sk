@@ -78,7 +78,7 @@ export async function getContent(stranka, sekcia) {
 /**
  * КОЛЛЕКЦИИ (СТИЛИ)
  */
-export async function getCollections() { // Открыто для посетителей
+export async function getCollections() {
   try {
     return await prisma.collection.findMany({ orderBy: { id: 'asc' } });
   } catch (error) {
@@ -105,8 +105,24 @@ export async function createCollection(data) {
       counter++;
     }
 
+    // Обработка массива галереи (строка с разделителями из формы превращается в массив)
+    let galleryArray = [];
+    if (typeof data.gallery === 'string') {
+      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
+    }
+
+    // Если в галерее есть фото, первое становится главным. Иначе берем то, что передали как mainImage.
+    const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
+
     const newCollection = await prisma.collection.create({
-      data: { ...data, slug: finalSlug },
+      data: { 
+        title: data.title,
+        subtitle: data.subtitle,
+        description: data.description,
+        mainImage: mainImage,
+        gallery: galleryArray,
+        slug: finalSlug 
+      },
     });
 
     revalidatePath("/");
@@ -121,20 +137,30 @@ export async function updateCollection(id, data) {
   if (!session) throw new Error("Unauthorized");
 
   try {
+    // Обработка массива галереи
+    let galleryArray = [];
+    if (typeof data.gallery === 'string') {
+      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
+    }
+
+    // Первое фото из галереи становится главным
+    const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
+
     const updated = await prisma.collection.update({
       where: { id: Number(id) },
       data: {
         title: data.title,
         subtitle: data.subtitle,
-        mainImage: data.mainImage,
         description: data.description,
+        mainImage: mainImage,
+        gallery: galleryArray,
       },
     });
     revalidatePath("/");
-    revalidatePath(`/kolekcia/${updated.slug}`);
+    revalidatePath(`/katalog/${updated.slug}`);
     return { success: true, data: updated };
   } catch (error) {
-    return { success: false };
+    return { success: false, error: error.message };
   }
 }
 

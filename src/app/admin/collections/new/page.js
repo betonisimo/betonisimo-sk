@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import ImagePicker from "@/components/admin/ImagePicker";
+import GalleryPicker from "@/components/admin/GalleryPicker"; // ИМПОРТ НОВОГО КОМПОНЕНТА
 
 export default function NewCollectionPage() {
 
@@ -12,7 +12,7 @@ export default function NewCollectionPage() {
     const data = {
       title: formData.get("title"),
       subtitle: formData.get("subtitle"),
-      mainImage: formData.get("mainImage"),
+      gallery: formData.get("gallery"), // БЕРЕМ СТРОКУ ИЗ GALLERY PICKER
       description: formData.get("description"),
     };
     await createCollection(data);
@@ -24,7 +24,6 @@ export default function NewCollectionPage() {
     <div className="min-h-screen bg-[#F2F2F2] pt-32 md:pt-44 pb-24 px-6 font-sans text-black">
       <div className="max-w-4xl mx-auto">
         
-        {/* BACK LINK - Systémový marker */}
         <Link 
           href="/admin/editor#kolekcie" 
           className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-black mb-12 transition-colors group"
@@ -36,27 +35,26 @@ export default function NewCollectionPage() {
         <div className="bg-white border border-black rounded-none shadow-2xl overflow-hidden">
           <form action={handleSave}>
             
-            {/* IMAGE PICKER S NÁPISOM */}
+            {/* ИСПОЛЬЗУЕМ НОВЫЙ GALLERY PICKER */}
             <div className="border-b border-black">
               <div className="bg-slate-50 p-4 text-[9px] font-black uppercase tracking-widest text-slate-400 border-b border-black font-mono">
-                // Hlavný_vizuál_kolekcie
+                // Galéria_Katalogu
               </div>
-              <ImagePicker defaultValue="" />
+              <div className="p-6">
+                <GalleryPicker defaultImages={[]} />
+              </div>
             </div>
 
             <div className="p-8 md:p-16 space-y-12">
-              
-              {/* HEADER */}
               <div className="border-l-4 border-red-600 pl-8">
                 <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
-                  Nová <span className="text-red-600">Kolekcia</span>
+                  Nový <span className="text-red-600">katalog</span>
                 </h1>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">
                   Definovanie nového dizajnového štýlu do katalógu
                 </p>
               </div>
 
-              {/* INPUTS */}
               <div className="space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-2">
@@ -81,7 +79,7 @@ export default function NewCollectionPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Technický popis (Kolekcia Info)</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Technický popis (katalog Info)</label>
                   <textarea 
                     name="description" 
                     required 
@@ -92,7 +90,6 @@ export default function NewCollectionPage() {
                 </div>
               </div>
 
-              {/* ACTION BUTTON */}
               <div className="pt-12 mt-12 border-t border-black flex justify-end">
                 <button 
                   type="submit" 
@@ -101,20 +98,11 @@ export default function NewCollectionPage() {
                   <span className="relative z-10 flex items-center gap-4">
                     <Save size={18} /> Vytvoriť kolekciu
                   </span>
-                  {/* Hover fill animácia */}
                   <div className="absolute inset-0 bg-red-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 </button>
               </div>
             </div>
           </form>
-        </div>
-        
-        {/* SYSTÉMOVÝ INFO FOOTER */}
-        <div className="mt-8 text-right">
-           <p className="text-[9px] font-mono text-slate-300 uppercase tracking-tighter">
-             // DB_Record_Initialization <br />
-             // Industrial_Design_System_v2.1
-           </p>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ export default async function Hero() {
     title_end: "PLOTY",
     description: "Zvyšujeme hodnotu vašej nehnuteľnosti plotmi, ktoré vydržia generácie.",
     bg_image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070",
-    cta1_text: "Prezrieť kolekcie", cta1_link: "/kolekcie", show_cta1: true,
+    cta1_text: "Prezrieť katalógu", cta1_link: "/katalog", show_cta1: true,
     cta2_text: "Cenová ponuka", cta2_link: "/kontakt", show_cta2: true,
   };
 

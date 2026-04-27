@@ -36,7 +36,7 @@ export default async function Home() {
   return (
     <main>
       <Hero />
-      <StyleGrid collections={collections} />
+      <StyleGrid collections={collections} limit={8}/>
       <PortfolioPreview projects={recentProjects} />
       <About editMode={false} dbData={aboutData || undefined} />
       <Services editMode={false} dbData={servicesData || undefined} />

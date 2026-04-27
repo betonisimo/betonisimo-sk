@@ -38,7 +38,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
 
     // 2. Коллекции
     const collectionUrls = collections.map((collection) => ({
-      url: `${baseUrl}/kolekcia/${collection.slug}`,
+      url: `${baseUrl}/katalog/${collection.slug}`,
       lastModified: new Date(), // Просто ставим текущую дату
       changeFrequency: "weekly",
       priority: 0.9,

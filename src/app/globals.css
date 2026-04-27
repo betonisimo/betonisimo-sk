@@ -85,4 +85,11 @@ button, [role="button"] {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scroll-padding: 2rem;
+}/* Nahraďte '.trieda-miniatury' skutočnou triedou vašich miniatúr */
+.trieda-miniatury:hover,
+.trieda-miniatury img:hover,
+.trieda-miniatury,
+.trieda-miniatury img {
+    border: none; /* Skúste najprv toto pre odstránenie okraja */
+    /* Ak by border nezmizol, skúste aj 'outline: none;' */
 }

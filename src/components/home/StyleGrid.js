@@ -1,9 +1,16 @@
 "use client";
 import Link from "next/link";
-import { Check, ArrowUpRight } from "lucide-react";
+import { Check, ArrowUpRight, Grid3X3 } from "lucide-react";
 
-export default function StyleGrid({ collections }) {
+// ДОБАВИЛИ ПРОПС limit
+export default function StyleGrid({ collections, limit }) {
   if (!collections || collections.length === 0) return null;
+
+  // Если передан лимит (например, 8), обрезаем массив. Если нет — показываем все.
+  const displayCollections = limit ? collections.slice(0, limit) : collections;
+  
+  // Проверяем, есть ли еще коллекции, чтобы показать кнопку
+  const hasMore = limit && collections.length > limit;
 
   return (
     <section className="py-24 lg:py-40 bg-[#f8fafc] border-b border-slate-200 font-sans" id="kolekcie">
@@ -30,71 +37,77 @@ export default function StyleGrid({ collections }) {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {collections.map((col, idx) => (
-            <div
+          {displayCollections.map((col, idx) => (
+            <Link
+              href={`/katalog/${col.slug}`}
               key={col.id}
-              // Строгий радиус 2px, тень при наведении, бордер НЕ МЕНЯЕТСЯ
-              className="bg-white flex flex-col border border-slate-200 rounded-[2px] transition-shadow duration-500 hover:shadow-2xl group relative overflow-hidden"
+              className="group relative flex flex-col justify-end aspect-[4/5] bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
             >
-              {/* IMAGE AREA */}
-              <div className="relative aspect-[4/5] bg-slate-900 rounded-t-[2px] overflow-hidden">
-                <img
-                  src={col.mainImage || '/uploads/default.webp'}
-                  alt={`Betónový plot - kolekcia ${col.title}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover filter grayscale transition-all duration-700 ease-in-out group-hover:!grayscale-0 group-hover:scale-110"
-                />
+              {/* BACKGROUND IMAGE */}
+              <img
+                src={col.mainImage || '/uploads/default.webp'}
+                alt={`Betónový plot - katalog ${col.title}`}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover filter grayscale transition-all duration-700 ease-in-out group-hover:grayscale-0 group-hover:scale-110 z-0"
+              />
 
-                {/* ОВЕРЛЕЙ: При наведении opacity падает до 30% (или даже 0%), чтобы цвет был 100% чистым */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/10 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
+              {/* GRADIENT OVERLAY */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-80 z-10 pointer-events-none"></div>
 
-                {/* ID MARKER */}
-                <div className="absolute top-6 left-6 text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm z-10 transition-colors duration-500 group-hover:bg-red-600/90 group-hover:text-white">
-                  LN_0{idx + 1}
-                </div>
-
-                {/* Названия */}
-                <div className="absolute bottom-8 left-6 right-6 z-10">
-                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none transition-transform duration-500 group-hover:-translate-y-1">
-                    {col.title}
-                  </h3>
-                  <p className="text-[#dc2626] text-[9px] font-black uppercase tracking-[0.3em] mt-3 drop-shadow-md">
-                    {col.subtitle || "Standard Line"}
-                  </p>
-                </div>
+              {/* ID MARKER */}
+              <div className="absolute top-6 left-6 text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm z-20 transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
+                LN_0{idx + 1}
               </div>
 
               {/* CONTENT AREA */}
-              <div className="p-6 md:p-8 flex flex-col flex-1 bg-white relative z-10">
-                <ul className="space-y-4 mb-8 flex-1">
+              <div className="relative z-20 p-6 md:p-8 flex flex-col">
+                <h3 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none transition-transform duration-500 group-hover:-translate-y-1">
+                  {col.title}
+                </h3>
+                <p className="text-[#dc2626] text-[9px] font-black uppercase tracking-[0.3em] mt-3 mb-6 drop-shadow-md">
+                  {col.subtitle || "Standard Line"}
+                </p>
+
+                <ul className="space-y-2 mb-6">
                   {["Individuálne riešenie", "Dlhá životnosť", "Top kvalita"].map((text, i) => (
-                    <li key={i} className="flex items-start gap-4 text-[11px] font-bold uppercase tracking-wide text-slate-700">
-                      <div className="mt-0.5 flex items-center justify-center w-4 h-4 bg-[#dc2626] text-white rounded-[2px] shrink-0">
-                        <Check size={10} strokeWidth={4} />
+                    <li key={i} className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest text-white/80">
+                      <div className="flex items-center justify-center w-3 h-3 bg-[#dc2626] text-white rounded-[1px] shrink-0">
+                        <Check size={8} strokeWidth={4} />
                       </div>
                       {text}
                     </li>
                   ))}
                 </ul>
 
-                {/* КНОПКА */}
-                <Link
-                  href={`/kolekcia/${col.slug}`}
-                  className="group/btn flex items-center justify-between pt-5 border-t border-slate-100 text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 hover:text-[#dc2626] transition-colors duration-300"
-                >
+                <div className="flex items-center gap-3 pt-4 border-t border-white/20 text-[10px] font-black uppercase tracking-[0.3em] text-white group-hover:text-[#dc2626] transition-colors duration-300 w-fit">
                   Zobraziť detaily
                   <ArrowUpRight
                     size={16}
-                    className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform duration-300"
+                    className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300"
                   />
-                </Link>
+                </div>
               </div>
 
               {/* PROGRESS BAR */}
-              <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-[#dc2626] group-hover:w-full transition-all duration-500 ease-out z-20"></span>
-            </div>
+              <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-[#dc2626] group-hover:w-full transition-all duration-500 ease-out z-30"></span>
+            </Link>
           ))}
         </div>
+
+        {/* КНОПКА "СМОТРЕТЬ ВСЕ" (появляется только если карточек больше лимита) */}
+        {hasMore && (
+          <div className="mt-16 pt-16 border-t border-slate-200 flex justify-center">
+            <Link 
+              href="/katalog" 
+              className="group relative inline-flex items-center justify-center bg-white text-slate-900 border-2 border-slate-900 px-10 py-5 rounded-[2px] font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:text-white overflow-hidden shadow-xl"
+            >
+              <span className="relative z-10 flex items-center gap-3">
+                <Grid3X3 size={16} /> Zobraziť kompletný katalóg
+              </span>
+              <div className="absolute inset-0 bg-slate-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            </Link>
+          </div>
+        )}
 
       </div>
     </section>

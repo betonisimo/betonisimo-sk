@@ -25,7 +25,7 @@ const Navbar = () => {
           {/* Логотип */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-2xl font-bold text-slate-900">
-              BETONISSIMO<span className="text-red-600">-SK</span>
+              BETONISSIMO<span className="text-red-600">.SK</span>
             </Link>
           </div>
 

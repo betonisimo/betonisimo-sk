@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import SmoothScroll from "@/components/shared/SmoothScroll";
 
 const inter = Inter({
   subsets: ["latin-ext"],
@@ -107,11 +106,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${inter.className} antialiased selection:bg-[#dc2626] selection:text-white`}>
-        <SmoothScroll>
+  
           <Navbar />
           <main>{children}</main>
           <Footer />
-        </SmoothScroll>
+        
       </body>
     </html>
   );

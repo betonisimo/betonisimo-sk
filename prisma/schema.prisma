@@ -47,6 +47,7 @@ model Collection {
   mainImage   String   // Ссылка на картинку
   description String   @db.Text // Тот длинный текст со скриншота
   features    Json?    // Список "Individuálne riešenie", "Dlhá životnosť" и т.д.
+  gallery     String[]
 }
 
 model Project {
