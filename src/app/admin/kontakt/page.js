@@ -1,10 +1,14 @@
+export const dynamic = 'force-dynamic';
 import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-export const dynamic = 'force-dynamic';
+
 export default async function AdminKontaktPage() {
   const dbData = await getContent("kontakt", "informacie");
+  
+  // ВОТ ЭТУ СТРОКУ МЫ ЗАБЫЛИ (Загружаем настройки формы из БД):
+  const formOptions = await getContent("kontakt", "form_options") || {};
 
   const defaultData = {
     firma: "BART Complex s.r.o.",
@@ -43,11 +47,11 @@ export default async function AdminKontaktPage() {
           </div>
         </div>
 
-        {/* Здесь editMode всегда TRUE, потому что мы внутри защищенной админки */}
         <div className="border border-slate-200 shadow-2xl">
           <KontaktClient 
             editMode={true} 
             initialData={dbData || defaultData} 
+            formOptions={formOptions} // <-- И ПЕРЕДАЕМ ИХ СЮДА!
           />
         </div>
       </div>

@@ -1,9 +1,10 @@
+export const dynamic = "force-dynamic";
 import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
-
 export default async function KontaktPage() {
-  // Загружаем данные из БД
   const dbData = await getContent("kontakt", "informacie");
+  // ПОЛУЧАЕМ НАСТРОЙКИ ФОРМЫ ИЗ БАЗЫ
+  const formOptions = await getContent("kontakt", "form_options") || {};
 
   const defaultData = {
     firma: "BART Complex s.r.o.",
@@ -20,15 +21,13 @@ export default async function KontaktPage() {
     show_tel: true,
     email: "info@beton-plotysk.sk",
     show_email: true,
-    map_link: "", 
-    show_map: true
   };
 
   return (
-    // editMode ВСЕГДА false для обычных посетителей
     <KontaktClient 
       editMode={false} 
       initialData={dbData || defaultData} 
+      formOptions={formOptions} // ПЕРЕДАЕМ ИХ В КОМПОНЕНТ
     />
   );
 }
