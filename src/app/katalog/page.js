@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getCollections } from "@/actions/adminActions";
 import StyleGrid from "@/components/home/StyleGrid";
 
