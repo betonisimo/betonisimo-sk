@@ -1,23 +1,39 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createCollection } from "@/actions/adminActions";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
-import GalleryPicker from "@/components/admin/GalleryPicker"; // ИМПОРТ НОВОГО КОМПОНЕНТА
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import GalleryPicker from "@/components/admin/GalleryPicker";
 
 export default function NewCollectionPage() {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false); // Стейт для блокировки кнопки
 
-  async function handleSave(formData) {
-    "use server";
+  async function handleSubmit(event) {
+    event.preventDefault(); // Останавливаем стандартную перезагрузку страницы
+
+    if (isSaving) return; // Защита: если уже сохраняем, игнорируем новые клики
+    setIsSaving(true); // Блокируем кнопку
+
+    const formData = new FormData(event.target);
     const data = {
       title: formData.get("title"),
       subtitle: formData.get("subtitle"),
-      gallery: formData.get("gallery"), // БЕРЕМ СТРОКУ ИЗ GALLERY PICKER
+      gallery: formData.get("gallery"),
       description: formData.get("description"),
     };
-    await createCollection(data);
-    revalidatePath("/admin/editor");
-    redirect("/admin/editor#kolekcie");
+
+    try {
+      await createCollection(data);
+      router.refresh(); // Сбрасываем кэш, чтобы новые данные появились в админке
+      router.push("/admin/editor#kolekcie"); // Перенаправляем пользователя
+    } catch (error) {
+      console.error("Chyba:", error);
+      alert("Nastala chyba pri ukladaní.");
+      setIsSaving(false); // Разблокируем кнопку, если произошла ошибка
+    }
   }
 
   return (
@@ -33,9 +49,9 @@ export default function NewCollectionPage() {
         </Link>
 
         <div className="bg-white border border-black rounded-none shadow-2xl overflow-hidden">
-          <form action={handleSave}>
+          {/* Меняем action на onSubmit */}
+          <form onSubmit={handleSubmit}>
             
-            {/* ИСПОЛЬЗУЕМ НОВЫЙ GALLERY PICKER */}
             <div className="border-b border-black">
               <div className="bg-slate-50 p-4 text-[9px] font-black uppercase tracking-widest text-slate-400 border-b border-black font-mono">
                 // Galéria_Katalogu
@@ -93,12 +109,16 @@ export default function NewCollectionPage() {
               <div className="pt-12 mt-12 border-t border-black flex justify-end">
                 <button 
                   type="submit" 
-                  className="group relative px-12 py-6 bg-black text-white font-black uppercase text-xs tracking-[0.3em] overflow-hidden transition-all"
+                  disabled={isSaving}
+                  className="group relative px-12 py-6 bg-black text-white font-black uppercase text-xs tracking-[0.3em] overflow-hidden transition-all disabled:bg-slate-400 disabled:cursor-not-allowed"
                 >
                   <span className="relative z-10 flex items-center gap-4">
-                    <Save size={18} /> Vytvoriť kolekciu
+                    {/* Меняем иконку и текст в зависимости от стейта */}
+                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} 
+                    {isSaving ? "Vytváram..." : "Vytvoriť kolekciu"}
                   </span>
-                  <div className="absolute inset-0 bg-red-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                  {/* Прячем красный фон при наведении, если кнопка заблокирована */}
+                  {!isSaving && <div className="absolute inset-0 bg-red-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>}
                 </button>
               </div>
             </div>
