@@ -124,7 +124,8 @@ export async function createCollection(data) {
         slug: finalSlug 
       },
     });
-
+    revalidatePath("/admin/editor"); 
+    revalidatePath("/katalog");
     revalidatePath("/");
     return { success: true, data: newCollection };
   } catch (error) {
