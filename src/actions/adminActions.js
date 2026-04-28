@@ -105,13 +105,12 @@ export async function createCollection(data) {
       counter++;
     }
 
-    // Обработка массива галереи (строка с разделителями из формы превращается в массив)
+    // Обработка массива галереи
     let galleryArray = [];
     if (typeof data.gallery === 'string') {
       galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
     }
 
-    // Если в галерее есть фото, первое становится главным. Иначе берем то, что передали как mainImage.
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
     const newCollection = await prisma.collection.create({
@@ -124,9 +123,12 @@ export async function createCollection(data) {
         slug: finalSlug 
       },
     });
-    revalidatePath("/admin/editor"); 
-    revalidatePath("/katalog");
+    
+    // Сброс кэша
     revalidatePath("/");
+    revalidatePath("/katalog");
+    revalidatePath("/admin/editor"); 
+    
     return { success: true, data: newCollection };
   } catch (error) {
     return { success: false, error: error.message };
@@ -138,13 +140,11 @@ export async function updateCollection(id, data) {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    // Обработка массива галереи
     let galleryArray = [];
     if (typeof data.gallery === 'string') {
       galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
     }
 
-    // Первое фото из галереи становится главным
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
     const updated = await prisma.collection.update({
@@ -157,8 +157,13 @@ export async function updateCollection(id, data) {
         gallery: galleryArray,
       },
     });
+    
+    // Сброс кэша
     revalidatePath("/");
+    revalidatePath("/katalog");
     revalidatePath(`/katalog/${updated.slug}`);
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
     return { success: true, data: updated };
   } catch (error) {
     return { success: false, error: error.message };
@@ -171,10 +176,34 @@ export async function deleteCollection(id) {
 
   try {
     await prisma.collection.delete({ where: { id: Number(id) } });
+    
+    // Сброс кэша
     revalidatePath("/");
+    revalidatePath("/katalog");
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
     return { success: true };
   } catch (error) {
     return { success: false };
+  }
+}
+
+// Удаление всех коллекций
+export async function deleteAllCollectionsAction() {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
+  try {
+    await prisma.collection.deleteMany({});
+    
+    // Сброс кэша
+    revalidatePath("/");
+    revalidatePath("/katalog");
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
   }
 }
 
@@ -206,7 +235,11 @@ export async function createProject(data) {
       data: { ...data, slug: finalSlug, images: parsedImages },
     });
     
+    // Сброс кэша
+    revalidatePath("/");
     revalidatePath("/realizacie");
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
     return { success: true, data: newProject };
   } catch (error) {
     return { success: false, error: error.message };
@@ -225,8 +258,12 @@ export async function updateProject(id, data) {
       data: { ...data, images: parsedImages },
     });
 
+    // Сброс кэша
+    revalidatePath("/");
     revalidatePath("/realizacie");
     revalidatePath(`/projekt/${updatedProject.slug}`);
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
     return { success: true, data: updatedProject };
   } catch (error) {
     return { success: false, error: error.message };
@@ -239,23 +276,14 @@ export async function deleteProject(id) {
 
   try {
     await prisma.project.delete({ where: { id: Number(id) } });
+    
+    // Сброс кэша
+    revalidatePath("/");
     revalidatePath("/realizacie");
+    revalidatePath("/admin/editor"); // <-- Добавлено для админки
+    
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
-  }
-}
-
-// Удаление всех коллекций
-export async function deleteAllCollectionsAction() {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    await prisma.collection.deleteMany({});
-    revalidatePath("/");
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e.message };
   }
 }
