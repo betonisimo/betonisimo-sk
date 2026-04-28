@@ -44,7 +44,7 @@ export async function sendContactEmail(formData) {
         requestBody: {
           values: [[
             new Date().toLocaleString('sk-SK'), 
-            data.name, data.email, data.phone, data.dlzka, 
+            data.name, data.email, `'${data.phone}`, data.dlzka, 
             data.vyska, data.prevedenie, data.druhBetonu, 
             data.farba, data.miesto, data.message || "Bez správy"
           ]],
