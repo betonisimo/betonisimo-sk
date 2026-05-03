@@ -5,48 +5,94 @@ import { put } from '@vercel/blob';
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 
-/**
- * СОХРАНЕНИЕ ОБЩЕГО КОНТЕНТА (Hero, Footer, About и т.д.)
+/** 
+ * ==========================================
+ * POMOCNÉ FUNKCIE (UTILITIES) - DRY Princíp
+ * ==========================================
+ */
+
+// Centralizované čistenie cache pre celú aplikáciu
+function purgeCache() {
+  revalidatePath("/", "layout");
+}
+
+// Bezpečná kontrola administrátora
+async function requireAdmin() {
+  const session = await getServerSession();
+  if (!session) throw new Error("Neautorizovaný prístup. Vyžaduje sa prihlásenie.");
+  return session;
+}
+
+// Optimalizovaný generátor unikátnych URL (Slug)
+async function generateUniqueSlug(model, title) {
+  const baseSlug = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+
+  let finalSlug = baseSlug;
+  let counter = 1;
+  const MAX_ATTEMPTS = 50; // Ochrana proti nekonečnému cyklu
+
+  while (await model.findUnique({ where: { slug: finalSlug }, select: { id: true } })) {
+    if (counter > MAX_ATTEMPTS) throw new Error("Nepodarilo sa vygenerovať unikátny slug.");
+    finalSlug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  return finalSlug;
+}
+
+// Parser pre galériu obrázkov
+function parseGalleryString(galleryData) {
+  if (typeof galleryData === 'string') {
+    return galleryData.split(',').filter(url => url.trim() !== "");
+  }
+  return [];
+}
+
+
+/** 
+ * ==========================================
+ * SPRÁVA OBSAHU (Hero, Footer, About...)
+ * ==========================================
  */
 export async function saveContent(stranka, sekcia, obsah) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized access! Nice try.");
+  await requireAdmin();
 
   try {
     const updated = await prisma.strankaObsah.upsert({
       where: { sekcia: sekcia },
       update: { obsah: obsah },
-      create: {
-        stranka: stranka,
-        sekcia: sekcia,
-        obsah: obsah
-      }
+      create: { stranka, sekcia, obsah }
     });
 
-    // Сбрасываем кэш, чтобы изменения были видны мгновенно
-    revalidatePath("/");
-    revalidatePath("/admin/editor");
-    revalidatePath("/kontakt");
-    revalidatePath("/admin/kontakt");
-    revalidatePath("/", "layout");
-
+    purgeCache();
     return { success: true, data: updated };
   } catch (error) {
     console.error("Chyba pri ukladaní do DB:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: "Systémová chyba pri ukladaní dát." };
   }
 }
 
-/**
- * ЭКШЕН ДЛЯ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ (Vercel Blob)
+
+/** 
+ * ==========================================
+ * UPLOAD OBRÁZKOV (Vercel Blob)
+ * ==========================================
  */
 export async function uploadImageAction(formData) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized: Only admins can upload images.");
+  await requireAdmin();
 
   try {
     const file = formData.get('file');
-    if (!file) throw new Error("Súbor nebol nájdený");
+    if (!file) throw new Error("Súbor nebol nájdený.");
+
+    // Bezpečnostná validácia: max 5MB a iba obrázky
+    const MAX_SIZE = 5 * 1024 * 1024; 
+    if (file.size > MAX_SIZE) throw new Error("Súbor je príliš veľký (max 5MB).");
+    if (!file.type.startsWith('image/')) throw new Error("Povolené sú iba obrázky (JPG, PNG, WEBP).");
 
     const blob = await put(file.name, file, { 
       access: 'public',
@@ -60,13 +106,17 @@ export async function uploadImageAction(formData) {
   }
 }
 
-/**
- * ПОЛУЧЕНИЕ КОНТЕНТА (Оставляем открытым для посетителей)
+
+/** 
+ * ==========================================
+ * VEREJNÉ DÁTA (Bez overenia)
+ * ==========================================
  */
 export async function getContent(stranka, sekcia) {
   try {
     const data = await prisma.strankaObsah.findUnique({
-      where: { sekcia: sekcia }
+      where: { sekcia: sekcia },
+      select: { obsah: true } // Ťaháme len to, čo potrebujeme
     });
     return data ? data.obsah : null;
   } catch (error) {
@@ -75,42 +125,36 @@ export async function getContent(stranka, sekcia) {
   }
 }
 
-/**
- * КОЛЛЕКЦИИ (СТИЛИ)
- */
-export async function getCollections() {
+export async function getCollections(lightweight = false) {
   try {
-    return await prisma.collection.findMany({ orderBy: { id: 'asc' } });
+    return await prisma.collection.findMany({ 
+      orderBy: { id: 'desc' }, // Nové záznamy hore
+      // Ak je lightweight true, neťaháme ťažký text a galériu (šetrí dáta)
+      select: lightweight ? {
+        id: true,
+        title: true,
+        subtitle: true,
+        slug: true,
+        mainImage: true,
+      } : undefined
+    });
   } catch (error) {
     return [];
   }
 }
 
+
+/** 
+ * ==========================================
+ * KOLEKCIE (Katalóg)
+ * ==========================================
+ */
 export async function createCollection(data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
-    const baseSlug = data.title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (await prisma.collection.findUnique({ where: { slug: finalSlug } })) {
-      finalSlug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    // Обработка массива галереи
-    let galleryArray = [];
-    if (typeof data.gallery === 'string') {
-      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
-    }
-
+    const finalSlug = await generateUniqueSlug(prisma.collection, data.title);
+    const galleryArray = parseGalleryString(data.gallery);
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
     const newCollection = await prisma.collection.create({
@@ -124,11 +168,7 @@ export async function createCollection(data) {
       },
     });
     
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); 
-    
+    purgeCache();
     return { success: true, data: newCollection };
   } catch (error) {
     return { success: false, error: error.message };
@@ -136,15 +176,10 @@ export async function createCollection(data) {
 }
 
 export async function updateCollection(id, data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
-    let galleryArray = [];
-    if (typeof data.gallery === 'string') {
-      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
-    }
-
+    const galleryArray = parseGalleryString(data.gallery);
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
     const updated = await prisma.collection.update({
@@ -158,12 +193,7 @@ export async function updateCollection(id, data) {
       },
     });
     
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath(`/katalog/${updated.slug}`);
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true, data: updated };
   } catch (error) {
     return { success: false, error: error.message };
@@ -171,75 +201,47 @@ export async function updateCollection(id, data) {
 }
 
 export async function deleteCollection(id) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
     await prisma.collection.delete({ where: { id: Number(id) } });
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true };
   } catch (error) {
-    return { success: false };
+    return { success: false, error: "Nepodarilo sa vymazať kolekciu." };
   }
 }
 
-// Удаление всех коллекций
 export async function deleteAllCollectionsAction() {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
     await prisma.collection.deleteMany({});
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true };
-  } catch (e) {
-    return { success: false, error: e.message };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 }
 
-/**
- * ПРОЕКТЫ (РЕАЛИЗАЦИИ)
+
+/** 
+ * ==========================================
+ * PROJEKTY (Realizácie)
+ * ==========================================
  */
 export async function createProject(data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
-    const baseSlug = data.title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (await prisma.project.findUnique({ where: { slug: finalSlug } })) {
-      finalSlug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
+    const finalSlug = await generateUniqueSlug(prisma.project, data.title);
+    const parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
     
     const newProject = await prisma.project.create({
       data: { ...data, slug: finalSlug, images: parsedImages },
     });
     
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true, data: newProject };
   } catch (error) {
     return { success: false, error: error.message };
@@ -247,23 +249,17 @@ export async function createProject(data) {
 }
 
 export async function updateProject(id, data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
-    let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
+    const parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
 
     const updatedProject = await prisma.project.update({
       where: { id: Number(id) },
       data: { ...data, images: parsedImages },
     });
 
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath(`/projekt/${updatedProject.slug}`);
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true, data: updatedProject };
   } catch (error) {
     return { success: false, error: error.message };
@@ -271,17 +267,11 @@ export async function updateProject(id, data) {
 }
 
 export async function deleteProject(id) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
+  await requireAdmin();
 
   try {
     await prisma.project.delete({ where: { id: Number(id) } });
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
+    purgeCache();
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
