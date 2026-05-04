@@ -94,6 +94,6 @@ button, [role="button"] {
     /* Ak by border nezmizol, skúste aj 'outline: none;' */
 }
 
-h2{
-  line-height: 110%;
+h1,h2{
+  line-height: 107%;
 }
