@@ -93,3 +93,7 @@ button, [role="button"] {
     border: none; /* Skúste najprv toto pre odstránenie okraja */
     /* Ak by border nezmizol, skúste aj 'outline: none;' */
 }
+
+h2{
+  line-height: 110%;
+}
