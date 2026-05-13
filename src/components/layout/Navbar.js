@@ -12,6 +12,7 @@ const Navbar = () => {
     { name: "Služby", href: "/#sluzby" },
     { name: "Realizácie", href: "/realizacie" },
     { name: "Kontakt", href: "/kontakt" },
+    { name: "Vzory", href: "/katalog" },
     // { name: "admin", href: "/admin" },
   ];
 

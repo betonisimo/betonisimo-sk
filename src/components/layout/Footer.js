@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { getContent } from "@/actions/adminActions";
-import { Mail, Phone, MapPin, Globe } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
+// Иконки
 const FacebookIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
 );
@@ -12,10 +13,17 @@ const InstagramIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
 );
 
+const YouTubeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+);
+
+const TikTokIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
+);
+
 export default async function Footer() {
   const footerData = await getContent("global", "footer");
 
-  // 1. Дефолтные данные (эталон)
   const defaults = {
     firma: "BETONISSIMO.SK", 
     show_firma: true,
@@ -32,15 +40,17 @@ export default async function Footer() {
     show_email: true,
     tel: "0911 640 097", 
     show_tel: true,
-    fb_link: "https://www.facebook.com/p/Betonissimosk-61577610401731/", 
+    fb_link: "https://www.facebook.com/", 
     show_fb: true,
-    ig_link: "https://www.instagram.com/betonissimo.sk", 
+    ig_link: "https://www.instagram.com/", 
     show_ig: true,
+    yt_link: "https://www.youtube.com/", 
+    show_yt: false,
+    tiktok_link: "https://www.tiktok.com/", 
+    show_tiktok: false,
     show_widget: true
   };
 
-  // 2. СЛИЯНИЕ: Берем дефолты и накладываем сверху данные из БД
-  // Это решит проблему отсутствующих ключей (как show_billing)
   const d = { ...defaults, ...(footerData || {}) };
 
   return (
@@ -60,8 +70,6 @@ export default async function Footer() {
                     {d.adresa}
                   </p>
                 )}
-                
-                {/* Секция фактурации теперь защищена от отсутствия show_billing */}
                 {d.show_billing && (
                   <div className="pt-4 border-t border-neutral-900 space-y-1 font-mono text-[10px]">
                     {d.show_ico && d.ico && <p>IČO: {d.ico}</p>}
@@ -84,12 +92,12 @@ export default async function Footer() {
                 </div>
                 <div className="space-y-4">
                   {d.show_email && (
-                    <a href={`mailto:${d.email1}`} className="flex items-center gap-3 text-xs text-white hover:text-white transition-none cursor-pointer">
+                    <a href={`mailto:${d.email1}`} className="flex items-center gap-3 text-xs text-white hover:text-white transition-none">
                       <Mail size={16} className="text-neutral-700" /> {d.email1}
                     </a>
                   )}
                   {d.show_tel && (
-                    <a href={`tel:${d.tel?.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-xl font-black tracking-tighter text-white hover:text-white transition-none cursor-pointer">
+                    <a href={`tel:${d.tel?.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-xl font-black tracking-tighter text-white hover:text-white transition-none">
                       <Phone size={20} className="text-[#dc2626]" /> {d.tel}
                     </a>
                   )}
@@ -99,20 +107,28 @@ export default async function Footer() {
           )}
 
           {/* SOCIÁLNE SIETE */}
-          {(d.show_fb || d.show_ig) && (
+          {(d.show_fb || d.show_ig || d.show_yt || d.show_tiktok) && (
             <div className="space-y-6">
               <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Sledujte nás</h4>
               <div className="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest">
                 {d.show_fb && (
-                  <a href={d.fb_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white transition-none">
-                    <span className="p-2 bg-neutral-900 rounded-[2px]"><FacebookIcon /></span>
-                    Facebook
+                  <a href={d.fb_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white">
+                    <span className="p-2 bg-neutral-900 rounded-[2px]"><FacebookIcon /></span> Facebook
                   </a>
                 )}
                 {d.show_ig && (
-                  <a href={d.ig_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white transition-none">
-                    <span className="p-2 bg-neutral-900 rounded-[2px]"><InstagramIcon /></span>
-                    Instagram
+                  <a href={d.ig_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white">
+                    <span className="p-2 bg-neutral-900 rounded-[2px]"><InstagramIcon /></span> Instagram
+                  </a>
+                )}
+                {d.show_yt && (
+                  <a href={d.yt_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white">
+                    <span className="p-2 bg-neutral-900 rounded-[2px]"><YouTubeIcon /></span> YouTube
+                  </a>
+                )}
+                {d.show_tiktok && (
+                  <a href={d.tiktok_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white">
+                    <span className="p-2 bg-neutral-900 rounded-[2px]"><TikTokIcon /></span> TikTok
                   </a>
                 )}
               </div>
