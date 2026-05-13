@@ -152,15 +152,15 @@ export default async function ProjectPage({ params }) {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4 group/item">
+                  {/* <div className="flex items-start gap-4 group/item">
                     <div className="w-10 h-10 bg-slate-50 flex items-center justify-center rounded-[2px] shrink-0 transition-colors duration-[800ms] group-hover/item:bg-[#dc2626]/10">
                       <ShieldCheck className="text-[#dc2626]" size={18} strokeWidth={2} />
                     </div>
-                    {/* <div className="pt-1">
+                    <div className="pt-1">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Záruka</p>
                       <p className="font-bold uppercase text-sm text-slate-900">10 ROKOV</p>
-                    </div> */}
-                  </div>
+                    </div>
+                  </div> */}
                 </div>
 
                 <div className="pt-10 relative z-10">
