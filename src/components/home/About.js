@@ -135,7 +135,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
               src={content.obrazok || defaultData.obrazok}
               alt="Elite Industrial About"
               fill
-              className={`object-cover filter grayscale scale-100 transition-all duration-[800ms] ease-in-out group-hover:!grayscale-0 group-hover:scale-110 ${isUploading ? 'opacity-30 blur-md' : ''}`}
+              className={`object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110 ${isUploading ? 'opacity-30 blur-md' : ''}`}
             />
             
             {/* ГРАДИЕНТ (исчезает при наведении) */}

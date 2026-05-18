@@ -72,8 +72,8 @@ export default function CollectionGallery({ images, title }) {
             onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
             className={`relative h-full aspect-[4/3] rounded-[2px] overflow-hidden shrink-0 transition-all duration-300 ${
               currentIndex === idx 
-                ? "scale-[0.98] grayscale-0" 
-                : "opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+                ? "scale-[0.98] -0" 
+                : "opacity-60  hover:opacity-100 hover:-0"
             }`}
           >
             <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />

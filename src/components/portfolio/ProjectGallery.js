@@ -56,7 +56,7 @@ export default function ProjectGallery({ images, title }) {
                     {parsedImages.map((src, i) => (
                         <div key={i} className="flex-[0_0_85%] md:flex-[0_0_45%] lg:flex-[0_0_31%] min-w-0 pl-4 relative group">
                             <div className="relative aspect-video !rounded-[2px] overflow-hidden shadow-md group-hover:shadow-2xl transition-shadow duration-[800ms] bg-slate-900">
-                                <img src={src} alt={`${title} - ${i + 1}`} className="w-full h-full object-cover filter grayscale transition-all duration-[800ms] group-hover:!grayscale-0 group-hover:scale-110" />
+                                <img src={src} alt={`${title} - ${i + 1}`} className="w-full h-full object-cover filter  transition-all duration-[800ms] group-hover:!-0 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-70 transition-opacity duration-[800ms] group-hover:opacity-0" />
                                 <button onClick={() => setIndex(i)} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-[800ms] flex items-center justify-center">
                                     <div className="bg-black/60 p-4 !rounded-[2px] border border-white/20 backdrop-blur-sm hover:bg-[#dc2626] transition-all">

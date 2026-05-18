@@ -48,7 +48,7 @@ export default function StyleGrid({ collections, limit }) {
                 src={col.mainImage || '/uploads/default.webp'}
                 alt={`Betónový plot - katalog ${col.title}`}
                 loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover filter grayscale transition-all duration-700 ease-in-out group-hover:grayscale-0 group-hover:scale-110 z-0"
+                className="absolute inset-0 w-full h-full object-cover filter  transition-all duration-700 ease-in-out group-hover:-0 group-hover:scale-110 z-0"
               />
 
               {/* GRADIENT OVERLAY */}

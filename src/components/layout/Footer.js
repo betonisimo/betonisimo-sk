@@ -139,7 +139,7 @@ export default async function Footer() {
           {d.show_widget && d.fb_link && (
             <div className="space-y-6">
               <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Facebook Feed</h4>
-              <div className="bg-neutral-900 border border-neutral-800 p-1 rounded-[2px] overflow-hidden grayscale">
+              <div className="bg-neutral-900 border border-neutral-800 p-1 rounded-[2px] overflow-hidden ">
                 <iframe
                   src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(d.fb_link)}&tabs=timeline&width=340&height=230&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false`}
                   style={{ width: '100%', height: '230px' }}

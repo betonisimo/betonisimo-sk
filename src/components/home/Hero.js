@@ -22,14 +22,14 @@ export default async function Hero() {
   return (
     <section className="relative h-screen w-full flex items-center justify-center bg-black overflow-hidden font-sans">
       
-      {/* Background with Industrial Grayscale Filter */}
+      {/* Background with Industrial  Filter */}
       <div className="absolute inset-0 z-0">
         <Image 
           src={d.bg_image} 
           alt="Betónové ploty"
           fill
           priority
-          className="object-cover opacity-60 grayscale scale-105 animate-slow-zoom" 
+          className="object-cover opacity-60  scale-105 animate-slow-zoom" 
         />
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff10_1px,transparent_1px)] [background-size:40px_40px] z-[1]"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 z-[2]"></div>

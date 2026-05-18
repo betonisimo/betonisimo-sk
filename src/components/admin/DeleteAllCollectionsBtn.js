@@ -25,12 +25,13 @@ export default function DeleteAllCollectionsBtn() {
   };
 
   return (
-    <button
-      onClick={handleDelete}
-      className="px-4 py-2 text-red-500 hover:bg-red-50 border border-red-200 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
-    >
-      <Trash2 size={14} />
-      Vymazať všetko
-    </button>
+    // <button
+    //   onClick={handleDelete}
+    //   className="px-4 py-2 text-red-500 hover:bg-red-50 border border-red-200 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
+    // >
+    //   <Trash2 size={14} />
+    //   Vymazať všetko
+    // </button>
+    false
   );
 }

@@ -67,7 +67,7 @@ export default async function EditorPage() {
             {collections.map((col) => (
               <div key={col.id} className="bg-white p-6 flex items-center justify-between group/item hover:bg-slate-50 transition-colors duration-500">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 grayscale group-hover/item:grayscale-0 transition-all duration-700 bg-cover bg-center rounded-[2px] border border-slate-100" style={{ backgroundImage: col.mainImage ? `url('${col.mainImage}')` : 'none' }}></div>
+                  <div className="w-16 h-16  group-hover/item:-0 transition-all duration-700 bg-cover bg-center rounded-[2px] border border-slate-100" style={{ backgroundImage: col.mainImage ? `url('${col.mainImage}')` : 'none' }}></div>
                   <div>
                     <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight">{col.title}</h4>
                     <p className="text-[9px] text-slate-400 font-mono mt-1 uppercase tracking-widest">ID: {col.slug}</p>
@@ -96,7 +96,7 @@ export default async function EditorPage() {
             {projects.map((proj) => (
               <div key={proj.id} className="bg-white p-6 flex items-center justify-between group/item hover:bg-slate-50 transition-colors duration-500">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 grayscale group-hover/item:grayscale-0 transition-all duration-700 bg-cover bg-center rounded-[2px] border border-slate-100" style={{ backgroundImage: proj.mainImage ? `url('${proj.mainImage}')` : 'none' }}></div>
+                  <div className="w-16 h-16  group-hover/item:-0 transition-all duration-700 bg-cover bg-center rounded-[2px] border border-slate-100" style={{ backgroundImage: proj.mainImage ? `url('${proj.mainImage}')` : 'none' }}></div>
                   <div>
                     <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight">{proj.title}</h4>
                     <p className="text-[9px] text-slate-400 uppercase tracking-widest mt-1 font-bold">{proj.location || "// Location_Undefined"}</p>

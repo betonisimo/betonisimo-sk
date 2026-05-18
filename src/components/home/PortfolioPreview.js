@@ -61,7 +61,7 @@ export default function PortfolioPreview({ projects }) {
                   // СУПЕР SEO-ХАК ДЛЯ ЛОКАЛЬНЫХ КЛИЕНТОВ:
                   alt={`Betónový plot ${project.location ? 'montáž ' + project.location : ''} - ${project.title}`}
                   loading="lazy"
-                  className="w-full h-full object-cover filter grayscale scale-100 transition-all duration-[800ms] ease-in-out group-hover:!grayscale-0 group-hover:scale-110"
+                  className="w-full h-full object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110"
                 />
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 transition-opacity duration-[800ms] group-hover:opacity-30 pointer-events-none"></div>

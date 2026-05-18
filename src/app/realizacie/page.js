@@ -54,7 +54,7 @@ export default async function PortfolioPage() {
                     loading="lazy"
                     decoding="async"
                     // ЧИСТАЯ АНИМАЦИЯ 800MS (Масштаб + Гарантия цвета)
-                    className="w-full h-full object-cover filter grayscale scale-100 transition-all duration-[800ms] ease-in-out group-hover:!grayscale-0 group-hover:scale-110"
+                    className="w-full h-full object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500">
