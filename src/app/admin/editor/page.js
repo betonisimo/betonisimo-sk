@@ -9,18 +9,31 @@ import Benefits from "@/components/shared/Benefits";
 import DeleteAllCollectionsBtn from "@/components/admin/DeleteAllCollectionsBtn";
 import FooterEditor from "@/components/admin/FooterEditor";
 import HeroEditor from "@/components/admin/HeroEditor"; 
-
+import AnalyticsManager from "@/components/admin/AnalyticsManager";
 export default async function EditorPage() {
-  const footerData = await getContent("global", "footer");
-  const heroData = await getContent("domov", "hero");
-  const collections = await prisma.collection.findMany({ orderBy: { id: 'asc' } });
-  const projects = await prisma.project.findMany({ orderBy: { createdAt: 'desc' } });
-  const approvedReviews = await getReviewsAction();
-
-  const aboutData = await getContent("domov", "domov-o-nas");
-  const servicesData = await getContent("domov", "domov-sluzby");
-  const reviewsData = await getContent("domov", "domov-recenzie");
-  const benefitsData = await getContent("global", "vyhody");
+  const [
+    footerData,
+    heroData,
+    collections,
+    projects,
+    approvedReviews,
+    aboutData,
+    servicesData,
+    reviewsData,
+    benefitsData,
+    scriptSettings // Добавляем получение настроек скриптов
+  ] = await Promise.all([
+    getContent("global", "footer"),
+    getContent("domov", "hero"),
+    prisma.collection.findMany({ orderBy: { id: 'asc' } }),
+    prisma.project.findMany({ orderBy: { createdAt: 'desc' } }),
+    getReviewsAction(),
+    getContent("domov", "domov-o-nas"),
+    getContent("domov", "domov-sluzby"),
+    getContent("domov", "domov-recenzie"),
+    getContent("global", "vyhody"),
+    prisma.globalSettings.findUnique({ where: { key: "analytics_scripts" } })
+  ]);
 
   // Вспомогательный компонент для заголовка секции в стиле Elite Industrial
   const SectionHeader = ({ title, subtitle, actions }) => (
@@ -170,6 +183,12 @@ export default async function EditorPage() {
           <div className="p-8 md:p-12">
             <FooterEditor dbData={footerData || undefined} />
           </div>
+        </div>
+      </div>
+
+      <div className="mt-40 bg-white border-t border-slate-200">
+        <div className="max-w-[1400px] mx-auto">
+          <AnalyticsManager initialValue={scriptSettings?.value} />
         </div>
       </div>
     </div>

@@ -3,77 +3,64 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { prisma } from "@/lib/prisma";
 
 const inter = Inter({
   subsets: ["latin-ext"],
-  display: 'swap'
+  display: 'swap',
+  variable: '--font-inter',
 });
 
-// ZÁKLADNÁ URL (Dôležité pre správne fungovanie obrázkov na sociálnych sieťach)
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
 
-// POKROČILÉ SEO METADÁTA
-// src/app/layout.js
 export const metadata = {
+  metadataBase: new URL(baseUrl), 
   title: {
-    default: "BETONISSIMO.SK | Prémiové betónové ploty",
+    default: "BETONISSIMO.SK | Prémiové betónové ploty na kľúč",
     template: "%s | BETONISSIMO.SK"
   },
-  description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn a ploty, ktoré vydržia generácie.",
-  keywords: ["betónové ploty", "ploty na kľúč", "montáž plotov", "betónový plot cena", "oplotenie pozemku", "BART Complex s.r.o.", "Jelka", "Slovensko"],
+  description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Kvalitné oplotenie, ktoré vydrží generácie. Zameranie a nacenenie zdarma.",
+  keywords: ["betónové ploty", "betónový plot cena", "montáž plotov", "ploty na kľúč", "oplotenie Trnava", "BART Complex"],
   authors: [{ name: "BART Complex s.r.o." }],
-  creator: "BART Complex s.r.o.",
   
-  // OPEN GRAPH (Pre zdieľanie odkazov - Facebook, WhatsApp, LinkedIn)
   openGraph: {
     type: "website",
     locale: "sk_SK",
     url: baseUrl,
-    title: "BETTONISSIMO - Betónové ploty a záhradné doplnky | Kvalita a dizajn pre váš domov",
-    description: "Najlepšie betónové ploty na Slovensku. Od zamerania až po profesionálnu montáž.",
-    siteName: "Beton-SK",
+    title: "BETONISSIMO | Kvalitné betónové ploty s montážou",
+    description: "Profesionálna realizácia betónových plotov po celom Slovensku. Pozrite si naše portfólio.",
+    siteName: "Betonissimo",
     images: [
       {
-        url: "/og-image.jpg", // Vytvor si obrázok 1200x630 a vlož ho do zložky public/
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Beton-SK Realizácie",
+        alt: "Betónové ploty Betonissimo",
       },
     ],
   },
-
-  // TWITTER CARDS
-  twitter: {
-    card: "summary_large_image",
-    title: "Betónové ploty na kľúč | Beton-SK",
-    description: "Prémiové riešenia pre váš dom. Ploty, ktoré vydržia generácie.",
-    images: ["/og-image.jpg"],
-  },
-
-  // INŠTRUKCIE PRE VYHĽADÁVAČE
+  
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
       'max-image-preview': 'large',
-      'max-snippet': -1,
     },
   },
 };
 
-// JSON-LD ŠTRUKTÚROVANÉ DÁTA (Pre Local SEO a Google Maps)
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "HomeAndConstructionBusiness",
-  "name": "BART Complex s.r.o. - Beton-SK",
-  "image": `${baseUrl}/logo.png`, // Uisti sa, že máš v public/logo.png
+  "@type": "LocalBusiness", // Zmenené na LocalBusiness pre lepšie výsledky v mapách
+  "name": "BART Complex s.r.o. - Betonissimo",
+  "image": `${baseUrl}/logo.png`,
   "@id": baseUrl,
   "url": baseUrl,
-  "telephone": "0911640097",
+  "telephone": "+421911640097", // Medzinárodný formát je lepší pre Google
   "email": "info@beton-plotysk.sk",
+  "priceRange": "€€", 
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Novojelčanská 845/63",
@@ -83,34 +70,43 @@ const jsonLd = {
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": 48.1438, // Uprav na presné súradnice firmy
-    "longitude": 17.5028 // Uprav na presné súradnice firmy
+    "latitude": 48.1438,
+    "longitude": 17.5028
+  },
+  "areaServed": {
+    "@type": "Country",
+    "name": "Slovakia"
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     "opens": "08:00",
     "closes": "17:00"
-  },
-  "priceRange": "$$"
+  }
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const scriptSettings = await prisma.globalSettings.findUnique({
+    where: { key: "analytics_scripts" }
+  });
   return (
-    <html lang="sk">
+    <html lang="sk" className={inter.variable}>
       <head>
-        {/* Vloženie štruktúrovaných dát pre Google */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.className} antialiased selection:bg-[#dc2626] selection:text-white`}>
-  
+      <body className={`${inter.className} antialiased selection:bg-red-600 selection:text-white`}>
+          {scriptSettings?.value && (
+            <div 
+              dangerouslySetInnerHTML={{ __html: scriptSettings.value }} 
+              suppressHydrationWarning={true}
+            />
+          )}
           <Navbar />
           <main>{children}</main>
           <Footer />
-        
       </body>
     </html>
   );
