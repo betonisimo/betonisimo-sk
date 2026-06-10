@@ -11,9 +11,7 @@ export async function sendLead(formData) {
     };
 
     const newLead = await prisma.objednavka.create({ data });
-    
-    // Тут можно добавить отправку на Email через nodemailer
-    
+        
     return { success: true };
   } catch (error) {
     console.error("Chyba pri odosielaní:", error);

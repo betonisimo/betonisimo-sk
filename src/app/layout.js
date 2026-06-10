@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
-
+import Script from "next/script";
 const inter = Inter({
   subsets: ["latin-ext"],
   display: 'swap',
@@ -96,14 +96,16 @@ export default async function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {scriptSettings?.value && (
+          <Script id="admin-global-analytics" strategy="afterInteractive">
+            {`
+              // Избавляемся от тегов <script> внутри строки, чтобы передать чистый JS код в Next.js
+              ${scriptSettings.value.replace(/<\/?[^>]+(>|$)/g, "")}
+            `}
+          </Script>
+        )}
       </head>
       <body className={`${inter.className} antialiased selection:bg-red-600 selection:text-white`}>
-          {scriptSettings?.value && (
-            <div 
-              dangerouslySetInnerHTML={{ __html: scriptSettings.value }} 
-              suppressHydrationWarning={true}
-            />
-          )}
           <Navbar />
           <main>{children}</main>
           <Footer />
