@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { sendContactEmail } from "@/actions/emailActions";
-
 export default function ContactForm({ options = {} }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
@@ -49,6 +48,43 @@ export default function ContactForm({ options = {} }) {
     }
   }
 
+  // if (status === 'success') {
+  //   return (
+  //     <div className="py-10 text-center animate-in fade-in duration-500">
+  //       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 mb-4">✓</div>
+  //       <h3 className="text-xl font-bold text-slate-900 mb-2">Dopyt bol odoslaný</h3>
+  //       <p className="text-slate-500 text-sm">Budeme vás kontaktovať s cenovou ponukou v čo najkratšom čase.</p>
+  //       <button type="button" onClick={() => setStatus(null)} className="mt-6 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
+  //         Poslať ďalší dopyt
+  //       </button>
+  //     </div>
+  //   );
+  // }
+  useEffect(() => {
+    if (status === 'success' && options.analyticsScripts) {
+      try {
+        // Ищем маркер в строке из админки
+        const parts = options.analyticsScripts.split("<!--Event snippet-->");
+        if (parts.length > 1) {
+          // Вытаскиваем только чистый скрипт конверсии
+          const conversionRaw = parts[1];
+
+          // Очищаем от тегов <script> и </script>, чтобы вытащить чистый JS код
+          const jsCode = conversionRaw
+            .replace(/<script[^>]*>/gi, "")
+            .replace(/<\/script>/gi, "");
+
+          // Динамически выполняем этот код в браузере
+          const launchConversion = new Function(jsCode);
+          launchConversion();
+        }
+      } catch (err) {
+        console.error("Ошибка запуска скрипта конверсии из админки:", err);
+      }
+    }
+  }, [status, options.analyticsScripts]);
+
+  // Блок успешного экрана
   if (status === 'success') {
     return (
       <div className="py-10 text-center animate-in fade-in duration-500">
@@ -84,7 +120,7 @@ export default function ContactForm({ options = {} }) {
 
       <div className="space-y-5 border-t border-slate-100 pt-6">
         <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#dc2626] mb-2">// Špecifikácia oplotenia</h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dĺžka oplotenia (bežné metre)</label>
