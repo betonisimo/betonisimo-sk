@@ -166,7 +166,7 @@ export default async function Footer() {
               Ochrana osobných údajov (GDPR)
             </Link>
             <Link href="/cookies" className="hover:text-white transition-colors">
-              Cookies[cite: 2]
+              Cookies
             </Link>
           </div>
         </div>
