@@ -151,14 +151,26 @@ export default async function Footer() {
               </div>
             </div>
           )}
+
         </div>
 
-        <div className="pt-12 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center gap-6">
+       <div className="pt-12 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[9px] font-mono text-slate-600 uppercase tracking-widest text-center md:text-left leading-relaxed">
             © 2020 - {new Date().getFullYear()} BETONISSIMO.SK <br />
             Architectural Concrete Solutions
           </p>
+
+          {/* Сюда перенесли ссылки, чтобы они стояли в ряд и не ломали сетку сайта */}
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            <Link href="/gdpr" className="hover:text-white transition-colors">
+              Ochrana osobných údajov (GDPR)
+            </Link>
+            <Link href="/cookies" className="hover:text-white transition-colors">
+              Cookies[cite: 2]
+            </Link>
+          </div>
         </div>
+
       </div>
     </footer>
   );

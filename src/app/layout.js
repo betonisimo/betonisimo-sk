@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
 import Script from "next/script";
 import AdminScripts from "@/components/admin/AdminScripts";
+import CookieBanner from "@/components/CookieBanner";
 const inter = Inter({
   subsets: ["latin-ext"],
   display: 'swap',
@@ -107,6 +108,7 @@ export default async function RootLayout({ children }) {
           <Navbar />
           <main>{children}</main>
           <Footer />
+          <CookieBanner /> {/* Подключаем сюда */}
         </body>
     </html>
   );

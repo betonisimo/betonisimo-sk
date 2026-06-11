@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { sendContactEmail } from "@/actions/emailActions";
+import Link from "next/link"; 
 export default function ContactForm({ options = {} }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
@@ -201,6 +202,23 @@ export default function ContactForm({ options = {} }) {
       <div className="space-y-1 border-t border-slate-100 pt-6">
         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Špeciálne požiadavky / Vaša správa</label>
         <textarea name="message" rows={3} placeholder="Máte ďalšie otázky?" className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent resize-none text-slate-900 font-medium" />
+      </div>
+
+      {/* Текст согласия с обработкой данных и ссылкой на GDPR */}
+      <div className="flex items-start gap-3 pt-2">
+        <input
+          type="checkbox"
+          id="gdpr_consent"
+          name="gdprConsent"
+          required
+          className="w-4 h-4 mt-0.5 accent-[#dc2626] cursor-pointer border-slate-300 rounded text-[#dc2626] focus:ring-[#dc2626]"
+        />
+        <label htmlFor="gdpr_consent" className="text-xs text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
+          Súhlasím so spracovaním osobných údajov za účelom vybavenia mojej požiadavky. Oboznámil/-a som sa so{" "}
+          <Link href="/gdpr" target="_blank" className="text-[#dc2626] underline hover:text-black transition-colors font-bold">
+            Zásadami ochrany osobných údajov
+          </Link>.
+        </label>
       </div>
 
       <div className="pt-4">
