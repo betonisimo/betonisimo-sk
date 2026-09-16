@@ -1,20 +1,35 @@
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 import About from "@/components/home/About";
 import Services from "@/components/home/Services";
 import Reviews from "@/components/home/Reviews";
 import EditorHeader from "@/components/admin/EditorHeader";
-import { getContent } from "@/actions/adminActions";
+import { getAccessories, getContent } from "@/actions/adminActions";
 import { getReviewsAction } from "@/actions/reviewActions";
 import Benefits from "@/components/shared/Benefits";
 import DeleteAllCollectionsBtn from "@/components/admin/DeleteAllCollectionsBtn";
 import FooterEditor from "@/components/admin/FooterEditor";
 import HeroEditor from "@/components/admin/HeroEditor"; 
 import AnalyticsManager from "@/components/admin/AnalyticsManager";
+
+function SectionHeader({ title, subtitle, actions }) {
+  return (
+    <div className="p-8 md:p-10 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white">
+      <div className="border-l-4 border-[#dc2626] pl-6">
+        <h2 className="text-3xl font-black uppercase tracking-tighter leading-none text-slate-900">{title}</h2>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">{subtitle}</p>
+      </div>
+      <div className="flex items-center gap-3">{actions}</div>
+    </div>
+  );
+}
+
 export default async function EditorPage() {
   const [
     footerData,
     heroData,
     collections,
+    accessories,
     projects,
     approvedReviews,
     aboutData,
@@ -26,6 +41,7 @@ export default async function EditorPage() {
     getContent("global", "footer"),
     getContent("domov", "hero"),
     prisma.collection.findMany({ orderBy: { id: 'asc' } }),
+    getAccessories(),
     prisma.project.findMany({ orderBy: { createdAt: 'desc' } }),
     getReviewsAction(),
     getContent("domov", "domov-o-nas"),
@@ -34,17 +50,6 @@ export default async function EditorPage() {
     getContent("global", "vyhody"),
     prisma.globalSettings.findUnique({ where: { key: "analytics_scripts" } })
   ]);
-
-  // Вспомогательный компонент для заголовка секции в стиле Elite Industrial
-  const SectionHeader = ({ title, subtitle, actions }) => (
-    <div className="p-8 md:p-10 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white">
-      <div className="border-l-4 border-[#dc2626] pl-6">
-        <h2 className="text-3xl font-black uppercase tracking-tighter leading-none text-slate-900">{title}</h2>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">{subtitle}</p>
-      </div>
-      <div className="flex items-center gap-3">{actions}</div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-40 flex flex-col font-sans text-slate-900">
@@ -70,9 +75,9 @@ export default async function EditorPage() {
             actions={
               <>
                 <DeleteAllCollectionsBtn />
-                <a href="/admin/collections/new" className="px-8 py-4 bg-[#dc2626] text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all duration-300 rounded-[2px] shadow-lg">
+                <Link href="/admin/collections/new" className="px-8 py-4 bg-[#dc2626] text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all duration-300 rounded-[2px] shadow-lg">
                   + Novy katalog
-                </a>
+                </Link>
               </>
             }
           />
@@ -86,11 +91,47 @@ export default async function EditorPage() {
                     <p className="text-[9px] text-slate-400 font-mono mt-1 uppercase tracking-widest">ID: {col.slug}</p>
                   </div>
                 </div>
-                <a href={`/admin/collections/${col.id}`} className="px-5 py-2 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all rounded-[2px]">
+                <Link href={`/admin/collections/${col.id}`} className="px-5 py-2 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all rounded-[2px]">
                   Edit
-                </a>
+                </Link>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* --- SEKCIA: DOPLNKY --- */}
+        <div id="doplnky" className="overflow-hidden rounded-[2px] bg-white shadow-xl">
+          <SectionHeader
+            title="Doplnky a príslušenstvo"
+            subtitle="// Database_Management / Accessories"
+            actions={
+              <Link href="/admin/accessories/new" className="rounded-[2px] bg-[#dc2626] px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg transition-all duration-300 hover:bg-slate-900">
+                + Pridať doplnok
+              </Link>
+            }
+          />
+          <div className="grid grid-cols-1 gap-px bg-slate-100 md:grid-cols-2 lg:grid-cols-3">
+            {accessories.map((accessory) => (
+              <div key={accessory.id} className="group/item flex items-center justify-between bg-white p-6 transition-colors duration-500 hover:bg-slate-50">
+                <div className="flex items-center gap-5">
+                  <div
+                    className="h-16 w-16 rounded-[2px] border border-slate-100 bg-cover bg-center transition-all duration-700"
+                    style={{ backgroundImage: accessory.mainImage ? `url('${accessory.mainImage}')` : 'none' }}
+                  />
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-tight text-slate-900">{accessory.title}</h4>
+                    <p className="mt-1 font-mono text-[9px] uppercase tracking-widest text-slate-400">ID: {accessory.slug}</p>
+                    <p className="mt-1 text-sm font-black text-[#dc2626]">{accessory.price.toString()} €</p>
+                  </div>
+                </div>
+                <Link href={`/admin/accessories/${accessory.id}`} className="rounded-[2px] bg-slate-900 px-5 py-2 text-[9px] font-black uppercase tracking-widest text-white transition-all hover:bg-[#dc2626]">
+                  Edit
+                </Link>
+              </div>
+            ))}
+            {accessories.length === 0 && (
+              <p className="col-span-full bg-white p-8 text-center text-sm text-slate-400">Zatiaľ neboli pridané žiadne doplnky.</p>
+            )}
           </div>
         </div>
 
@@ -100,9 +141,9 @@ export default async function EditorPage() {
             title="Portfólio Projektov" 
             subtitle="// Field_Log / Works_2024" 
             actions={
-              <a href="/admin/projects/new" className="px-8 py-4 bg-[#dc2626] text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all duration-300 rounded-[2px] shadow-lg">
+              <Link href="/admin/projects/new" className="px-8 py-4 bg-[#dc2626] text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all duration-300 rounded-[2px] shadow-lg">
                 + Pridať realizáciu
-              </a>
+              </Link>
             }
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-slate-100">
@@ -115,9 +156,9 @@ export default async function EditorPage() {
                     <p className="text-[9px] text-slate-400 uppercase tracking-widest mt-1 font-bold">{proj.location || "// Location_Undefined"}</p>
                   </div>
                 </div>
-                <a href={`/admin/projects/${proj.id}`} className="px-5 py-2 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all rounded-[2px]">
+                <Link href={`/admin/projects/${proj.id}`} className="px-5 py-2 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all rounded-[2px]">
                   Edit
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -130,9 +171,9 @@ export default async function EditorPage() {
             subtitle="// User_Feedback / Moderation_Panel" 
             actions={
               <div className="flex gap-3">
-                <a href="/admin/reviews" className="px-6 py-4 border-2 border-slate-900 text-slate-900 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all rounded-[2px]">
+                <Link href="/admin/reviews" className="px-6 py-4 border-2 border-slate-900 text-slate-900 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all rounded-[2px]">
                   Moderovať
-                </a>
+                </Link>
               
               </div>
             }
@@ -147,7 +188,7 @@ export default async function EditorPage() {
            <div className="p-8 md:p-10">
               <div className="mb-12 border-l-4 border-[#dc2626] pl-6">
                 <h2 className="text-3xl font-black uppercase tracking-tighter leading-none text-slate-900">Globálne Výhody</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">// System_Benefits / Core_Specs</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">{"// System_Benefits / Core_Specs"}</p>
               </div>
               <Benefits editMode={true} dbData={benefitsData || undefined} />
            </div>

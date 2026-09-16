@@ -208,6 +208,127 @@ export async function deleteAllCollectionsAction() {
 }
 
 /**
+ * DOPLNKY (AKSESUÁRE)
+ */
+export async function getAccessories() {
+  try {
+    const accessories = await prisma.accessory.findMany({ orderBy: { id: 'asc' } });
+
+    return accessories.map((accessory) => ({
+      ...accessory,
+      price: accessory.price.toString(),
+    }));
+  } catch (error) {
+    console.error("Chyba pri načítaní doplnkov:", error);
+    return [];
+  }
+}
+
+export async function createAccessory(data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
+  try {
+    const baseSlug = data.title
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+    let finalSlug = baseSlug;
+    let counter = 1;
+    while (await prisma.accessory.findUnique({ where: { slug: finalSlug } })) {
+      finalSlug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    const galleryArray = typeof data.gallery === 'string'
+      ? data.gallery.split(',').map((url) => url.trim()).filter(Boolean)
+      : [];
+    const mainImage = galleryArray[0] || data.mainImage || "";
+    const price = String(data.price ?? "").trim().replace(',', '.');
+
+    if (!/^\d+(\.\d{1,2})?$/.test(price)) {
+      return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
+    }
+
+    const accessory = await prisma.accessory.create({
+      data: {
+        title: data.title,
+        subtitle: data.subtitle,
+        description: data.description,
+        price,
+        mainImage,
+        gallery: galleryArray,
+        slug: finalSlug,
+      },
+    });
+
+    revalidatePath("/doplnky");
+    revalidatePath("/admin/editor");
+    revalidatePath("/sitemap.xml");
+
+    return { success: true, data: { id: accessory.id, slug: accessory.slug } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateAccessory(id, data) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
+  try {
+    const galleryArray = typeof data.gallery === 'string'
+      ? data.gallery.split(',').map((url) => url.trim()).filter(Boolean)
+      : [];
+    const mainImage = galleryArray[0] || data.mainImage || "";
+    const price = String(data.price ?? "").trim().replace(',', '.');
+
+    if (!/^\d+(\.\d{1,2})?$/.test(price)) {
+      return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
+    }
+
+    const accessory = await prisma.accessory.update({
+      where: { id: Number(id) },
+      data: {
+        title: data.title,
+        subtitle: data.subtitle,
+        description: data.description,
+        price,
+        mainImage,
+        gallery: galleryArray,
+      },
+    });
+
+    revalidatePath("/doplnky");
+    revalidatePath(`/doplnky/${accessory.slug}`);
+    revalidatePath("/admin/editor");
+    revalidatePath("/sitemap.xml");
+
+    return { success: true, data: { id: accessory.id, slug: accessory.slug } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAccessory(id) {
+  const session = await getServerSession();
+  if (!session) throw new Error("Unauthorized");
+
+  try {
+    await prisma.accessory.delete({ where: { id: Number(id) } });
+    revalidatePath("/doplnky");
+    revalidatePath("/admin/editor");
+    revalidatePath("/sitemap.xml");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * ПРОЕКТЫ (РЕАЛИЗАЦИИ)
  */
 export async function createProject(data) {

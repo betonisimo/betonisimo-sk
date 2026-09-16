@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Realizácie", href: "/realizacie" },
   { name: "Kontakt", href: "/kontakt" },
   { name: "Vzory", href: "/katalog" },
+  { name: "Doplnky", href: "/doplnky" },
 ];
 
 const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
@@ -25,13 +26,13 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
 
           {/* Логотип */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-slate-900">
+            <Link href="/" className="text-lg font-bold text-slate-900 sm:text-2xl">
               BETONISSIMO<span className="text-red-600">.SK</span>
             </Link>
           </div>
 
           {/* Десктопное меню */}
-          <div className="hidden md:flex items-center gap-5 lg:gap-8">
+          <div className="hidden items-center gap-5 min-[901px]:flex lg:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -45,7 +46,7 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
             {showPhone && phone && (
               <a
                 href={phoneHref}
-                className="hidden lg:inline-flex items-center gap-2 border-l border-slate-200 pl-6 text-sm font-black text-slate-900 transition-colors hover:text-[#dc2626] whitespace-nowrap"
+                className="inline-flex items-center gap-2 whitespace-nowrap border-l border-slate-200 pl-4 text-sm font-black text-slate-900 transition-colors hover:text-[#dc2626] lg:pl-6"
                 aria-label={`Zavolať na číslo ${phone}`}
               >
                 <Phone size={16} className="text-[#dc2626]" />
@@ -55,7 +56,18 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
           </div>
 
           {/* Мобильная кнопка */}
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center gap-1 min-[901px]:hidden">
+            {showPhone && phone && (
+              <a
+                href={phoneHref}
+                className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-black text-slate-900 transition-colors hover:text-[#dc2626] min-[360px]:text-xs sm:text-sm"
+                aria-label={`Zavolať na číslo ${phone}`}
+              >
+                <Phone size={14} className="hidden text-[#dc2626] min-[360px]:block" />
+                {phone}
+              </a>
+            )}
+
             <button
               type="button"
               className="relative z-[100] p-2 text-slate-700" // Высокий z-index
@@ -77,7 +89,7 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-b border-slate-100 overflow-hidden"
+            className="overflow-hidden border-b border-slate-100 bg-white min-[901px]:hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-2">
               {navLinks.map((link) => (

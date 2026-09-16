@@ -14,6 +14,10 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
       select: { slug: true },
     });
 
+    const accessories = await prisma.accessory.findMany({
+      select: { slug: true },
+    });
+
     // 1. Статические страницы
     const staticPages = [
       {
@@ -34,6 +38,12 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
         changeFrequency: "monthly",
         priority: 0.8,
       },
+      {
+        url: `${baseUrl}/doplnky`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.9,
+      },
     ];
 
     // 2. Коллекции
@@ -52,7 +62,14 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
       priority: 0.8,
     }));
 
-    return [...staticPages, ...collectionUrls, ...projectUrls];
+    const accessoryUrls = accessories.map((accessory) => ({
+      url: `${baseUrl}/doplnky/${accessory.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+
+    return [...staticPages, ...collectionUrls, ...accessoryUrls, ...projectUrls];
 
   } catch (error) {
     console.error("Ошибка при генерации sitemap:", error);
@@ -60,7 +77,8 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
     return [
       { url: baseUrl, lastModified: new Date() },
       { url: `${baseUrl}/realizacie`, lastModified: new Date() },
-      { url: `${baseUrl}/kontakt`, lastModified: new Date() }
+      { url: `${baseUrl}/kontakt`, lastModified: new Date() },
+      { url: `${baseUrl}/doplnky`, lastModified: new Date() }
     ];
   }
 }
