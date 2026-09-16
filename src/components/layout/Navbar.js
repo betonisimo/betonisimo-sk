@@ -2,19 +2,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, Phone, X } from "lucide-react";
 
-const Navbar = () => {
+const navLinks = [
+  { name: "O nás", href: "/#onas" },
+  { name: "Služby", href: "/#sluzby" },
+  { name: "Realizácie", href: "/realizacie" },
+  { name: "Kontakt", href: "/kontakt" },
+  { name: "Vzory", href: "/katalog" },
+];
+
+const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const navLinks = [
-    { name: "O nás", href: "/#onas" },
-    { name: "Služby", href: "/#sluzby" },
-    { name: "Realizácie", href: "/realizacie" },
-    { name: "Kontakt", href: "/kontakt" },
-    { name: "Vzory", href: "/katalog" },
-    // { name: "admin", href: "/admin" },
-  ];
+  const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
 
   return (
 <nav 
@@ -31,7 +31,7 @@ const Navbar = () => {
           </div>
 
           {/* Десктопное меню */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-5 lg:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -42,6 +42,16 @@ const Navbar = () => {
               </Link>
             ))}
 
+            {showPhone && phone && (
+              <a
+                href={phoneHref}
+                className="hidden lg:inline-flex items-center gap-2 border-l border-slate-200 pl-6 text-sm font-black text-slate-900 transition-colors hover:text-[#dc2626] whitespace-nowrap"
+                aria-label={`Zavolať na číslo ${phone}`}
+              >
+                <Phone size={16} className="text-[#dc2626]" />
+                {phone}
+              </a>
+            )}
           </div>
 
           {/* Мобильная кнопка */}
@@ -51,6 +61,7 @@ const Navbar = () => {
               className="relative z-[100] p-2 text-slate-700" // Высокий z-index
               onClick={() => setIsOpen(!isOpen)}
               aria-expanded={isOpen}
+              aria-label={isOpen ? "Zavrieť menu" : "Otvoriť menu"}
             >
               {/* Вместо сложных анимаций Framer Motion, для теста используй просто иконки */}
               {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -89,4 +100,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

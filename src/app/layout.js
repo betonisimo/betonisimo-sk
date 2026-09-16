@@ -88,9 +88,20 @@ const jsonLd = {
 };
 
 export default async function RootLayout({ children }) {
-  const scriptSettings = await prisma.globalSettings.findUnique({
-    where: { key: "analytics_scripts" }
-  });
+  const [scriptSettings, footerSettings] = await Promise.all([
+    prisma.globalSettings.findUnique({
+      where: { key: "analytics_scripts" }
+    }),
+    prisma.strankaObsah.findUnique({
+      where: { sekcia: "footer" }
+    }),
+  ]);
+
+  const footerData = footerSettings?.obsah;
+  const navigationPhone = typeof footerData?.tel === "string" && footerData.tel.trim()
+    ? footerData.tel
+    : "0911 640 097";
+  const showNavigationPhone = footerData?.show_tel !== false;
 
   return (
     <html lang="sk" className={inter.variable} suppressHydrationWarning>
@@ -105,7 +116,7 @@ export default async function RootLayout({ children }) {
       </head>
         <body className={`${inter.className} antialiased selection:bg-red-600 selection:text-white`}>
           <AdminScripts code={scriptSettings?.value} />
-          <Navbar />
+          <Navbar phone={navigationPhone} showPhone={showNavigationPhone} />
           <main>{children}</main>
           <Footer />
           <CookieBanner /> {/* Подключаем сюда */}
