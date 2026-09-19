@@ -1,84 +1,90 @@
 import { prisma } from "@/lib/prisma";
 
+const baseUrl = "https://betonissimo.sk";
+
 export default async function sitemap() {
-  // src/app/sitemap.js
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
+  const now = new Date();
+
+  // Статические страницы
+  const staticPages = [
+    {
+      url: baseUrl,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/realizacie`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/kontakt`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/doplnky`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+  ];
 
   try {
-    // Р‘РµР·РѕРїР°СЃРЅС‹Р№ Р·Р°РїСЂРѕСЃ: РїСЂРѕСЃРёРј С‚РѕР»СЊРєРѕ slug (РѕРЅ С‚РѕС‡РЅРѕ РµСЃС‚СЊ РІ Р±Р°Р·Рµ)
-    const collections = await prisma.collection.findMany({
-      select: { slug: true },
-    });
+    // Получаем данные из базы
+    const [collections, projects, accessories] =
+      await Promise.all([
+        prisma.collection.findMany({
+          select: { slug: true },
+        }),
 
-    const projects = await prisma.project.findMany({
-      select: { slug: true },
-    });
+        prisma.project.findMany({
+          select: { slug: true },
+        }),
 
-    const accessories = await prisma.accessory.findMany({
-      select: { slug: true },
-    });
+        prisma.accessory.findMany({
+          select: { slug: true },
+        }),
+      ]);
 
-    // 1. РЎС‚Р°С‚РёС‡РµСЃРєРёРµ СЃС‚СЂР°РЅРёС†С‹
-    const staticPages = [
-      {
-        url: baseUrl,
-        lastModified: new Date(),
-        changeFrequency: "daily",
-        priority: 1.0,
-      },
-      {
-        url: `${baseUrl}/realizacie`,
-        lastModified: new Date(),
-        changeFrequency: "weekly",
-        priority: 0.9,
-      },
-      {
-        url: `${baseUrl}/kontakt`,
-        lastModified: new Date(),
-        changeFrequency: "monthly",
-        priority: 0.8,
-      },
-      {
-        url: `${baseUrl}/doplnky`,
-        lastModified: new Date(),
-        changeFrequency: "weekly",
-        priority: 0.9,
-      },
-    ];
-
-    // 2. РљРѕР»Р»РµРєС†РёРё
+    // Коллекции
     const collectionUrls = collections.map((collection) => ({
       url: `${baseUrl}/katalog/${collection.slug}`,
-      lastModified: new Date(), // РџСЂРѕСЃС‚Рѕ СЃС‚Р°РІРёРј С‚РµРєСѓС‰СѓСЋ РґР°С‚Сѓ
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
     }));
 
-    // 3. РџСЂРѕРµРєС‚С‹
+    // Проекты
     const projectUrls = projects.map((project) => ({
       url: `${baseUrl}/projekt/${project.slug}`,
-      lastModified: new Date(), // РџСЂРѕСЃС‚Рѕ СЃС‚Р°РІРёРј С‚РµРєСѓС‰СѓСЋ РґР°С‚Сѓ
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     }));
 
+    // Аксессуары
     const accessoryUrls = accessories.map((accessory) => ({
       url: `${baseUrl}/doplnky/${accessory.slug}`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     }));
 
-    return [...staticPages, ...collectionUrls, ...accessoryUrls, ...projectUrls];
+    return [
+      ...staticPages,
+      ...collectionUrls,
+      ...accessoryUrls,
+      ...projectUrls,
+    ];
 
   } catch (error) {
-    console.error("РћС€РёР±РєР° РїСЂРё РіРµРЅРµСЂР°С†РёРё sitemap:", error);
-    // Р•СЃР»Рё Р±Р°Р·Р° РґР°РЅРЅС‹С… РЅРµРґРѕСЃС‚СѓРїРЅР°, РІРѕР·РІСЂР°С‰Р°РµРј С…РѕС‚СЏ Р±С‹ РіР»Р°РІРЅС‹Рµ СЃС‚СЂР°РЅРёС†С‹
-    return [
-      { url: baseUrl, lastModified: new Date() },
-      { url: `${baseUrl}/realizacie`, lastModified: new Date() },
-      { url: `${baseUrl}/kontakt`, lastModified: new Date() },
-      { url: `${baseUrl}/doplnky`, lastModified: new Date() }
-    ];
+    console.error("Ошибка генерации sitemap:", error);
+
+    // Если база недоступна, возвращаем статические страницы
+    return staticPages;
   }
 }
