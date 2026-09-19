@@ -5,7 +5,7 @@ const baseUrl = "https://betonissimo.sk";
 export default async function sitemap() {
   const now = new Date();
 
-  // Статические страницы
+  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
   const staticPages = [
     {
       url: baseUrl,
@@ -34,7 +34,7 @@ export default async function sitemap() {
   ];
 
   try {
-    // Получаем данные из базы
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
     const [collections, projects, accessories] =
       await Promise.all([
         prisma.collection.findMany({
@@ -50,7 +50,7 @@ export default async function sitemap() {
         }),
       ]);
 
-    // Коллекции
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     const collectionUrls = collections.map((collection) => ({
       url: `${baseUrl}/katalog/${collection.slug}`,
       lastModified: now,
@@ -58,7 +58,7 @@ export default async function sitemap() {
       priority: 0.9,
     }));
 
-    // Проекты
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     const projectUrls = projects.map((project) => ({
       url: `${baseUrl}/projekt/${project.slug}`,
       lastModified: now,
@@ -66,7 +66,7 @@ export default async function sitemap() {
       priority: 0.8,
     }));
 
-    // Аксессуары
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     const accessoryUrls = accessories.map((accessory) => ({
       url: `${baseUrl}/doplnky/${accessory.slug}`,
       lastModified: now,
@@ -82,9 +82,9 @@ export default async function sitemap() {
     ];
 
   } catch (error) {
-    console.error("Ошибка генерации sitemap:", error);
+    console.error("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ sitemap:", error);
 
-    // Если база недоступна, возвращаем статические страницы
+    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     return staticPages;
   }
 }
