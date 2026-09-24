@@ -1,17 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
+import { getSeo, getSeoMany, pageMetadata, seoSection } from "@/lib/seo";
 
-export const metadata = {
-  title: "Portfólio Realizácií | Elite Industrial",
-  description: "Technická dokumentácia našich dokončených projektov betónových oplotení.",
-  alternates: { canonical: "/realizacie" },
-};
+export async function generateMetadata() {
+  const seo = await getSeo("page", "realizacie");
+  return pageMetadata(seo, {
+    title: "Portfólio realizácií | BETONISSIMO.SK",
+    description: "Pozrite si naše realizácie betónových plotov a inšpirujte sa dokončenými projektmi.",
+    path: "/realizacie",
+  });
+}
 
 export default async function PortfolioPage() {
   const projects = await prisma.project.findMany({
     orderBy: { createdAt: 'desc' }
   });
+  const seo = await getSeoMany("project", projects.map((project) => project.id));
 
   return (
     <div className="bg-[#f8fafc] min-h-screen pt-44 pb-32 font-sans text-black">
@@ -51,7 +56,7 @@ export default async function PortfolioPage() {
                 {project.mainImage ? (
                   <img
                     src={project.mainImage}
-                    alt={project.title}
+                    alt={seo.get(seoSection("project", project.id))?.imageAlts?.[project.mainImage] || project.title}
                     loading="lazy"
                     decoding="async"
                     // ЧИСТАЯ АНИМАЦИЯ 800MS (Масштаб + Гарантия цвета)

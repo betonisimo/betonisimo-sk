@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import ImagePicker from "@/components/admin/ImagePicker";
 import MultiImagePicker from "@/components/admin/MultiImagePicker";
+import SeoFields from "@/components/admin/SeoFields";
+import { getSeo } from "@/lib/seo";
 
 export default async function EditProjectPage({ params }) {
   const resolvedParams = await params;
@@ -16,6 +18,7 @@ export default async function EditProjectPage({ params }) {
   });
 
   if (!project) return <div className="pt-40 text-center font-black uppercase tracking-widest text-red-600 text-xs">Projekt nebol nájdený // 404</div>;
+  const seo = await getSeo("project", project.id);
 
   async function handleSave(formData) {
     "use server";
@@ -26,8 +29,13 @@ export default async function EditProjectPage({ params }) {
       description: formData.get("description"),
       mainImage: formData.get("mainImage"),
       images: formData.get("images"), 
+      mainImageAlt: formData.get("mainImageAlt"),
+      imageAlts: formData.get("imageAlts"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
     };
-    await updateProject(id, data);
+    const result = await updateProject(id, data);
+    if (!result.success) throw new Error(result.error || "Projekt sa nepodarilo uložiť.");
     revalidatePath("/admin/editor");
     revalidatePath("/realizacie");
     revalidatePath(`/projekt/${project.slug}`);
@@ -67,7 +75,7 @@ export default async function EditProjectPage({ params }) {
                 <span>// Titulná_fotografia</span>
                 <span className="text-[8px] font-mono text-black">ID: {id}</span>
               </div>
-              <ImagePicker defaultValue={project.mainImage} />
+              <ImagePicker defaultValue={project.mainImage} defaultAlt={seo.imageAlts?.[project.mainImage] || ""} />
             </div>
 
             <div className="p-8 md:p-14 space-y-10">
@@ -124,9 +132,11 @@ export default async function EditProjectPage({ params }) {
                 {/* ГАЛЕРЕЯ */}
                 <div className="md:col-span-2 pt-8 border-t border-slate-100">
                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono mb-6">// Foto_Galéria</label>
-                   <MultiImagePicker defaultValue={project.images || []} />
+                   <MultiImagePicker defaultValue={project.images || []} defaultAlts={seo.imageAlts || {}} />
                 </div>
               </div>
+
+              <SeoFields seo={seo} />
 
               {/* ACTION BUTTONS */}
               <div className="pt-10 mt-10 border-t border-black flex flex-col sm:flex-row justify-between items-center gap-6">

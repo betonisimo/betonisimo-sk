@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { Camera, Loader2, X, Plus } from "lucide-react";
 import { uploadImage } from "@/actions/uploadActions";
 
-export default function MultiImagePicker({ defaultValue = [] }) {
+export default function MultiImagePicker({ defaultValue = [], defaultAlts = {} }) {
   const [images, setImages] = useState(defaultValue);
+  const [alts, setAlts] = useState(defaultAlts);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -53,8 +54,9 @@ export default function MultiImagePicker({ defaultValue = [] }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {/* Список уже загруженных фото */}
         {images.map((url, index) => (
-          <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group border border-slate-200">
-            <img src={url} className="w-full h-full object-cover" alt="Gallery item" />
+          <div key={index} className="rounded-xl overflow-hidden bg-slate-100 group border border-slate-200">
+            <div className="relative aspect-square">
+            <img src={url} className="w-full h-full object-cover" alt={alts[url] || `Fotografia projektu ${index + 1}`} />
             <button
               type="button"
               onClick={() => removeImage(index)}
@@ -62,6 +64,11 @@ export default function MultiImagePicker({ defaultValue = [] }) {
             >
               <X size={14} />
             </button>
+            </div>
+            <label className="block p-2 text-xs font-bold text-slate-600">
+              Popis fotografie (alt)
+              <input type="text" maxLength={180} value={alts[url] || ""} onChange={(event) => setAlts((current) => ({ ...current, [url]: event.target.value }))} placeholder="Čo je na fotografii?" className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-2 text-slate-900 outline-none focus:border-red-600" />
+            </label>
           </div>
         ))}
 
@@ -94,6 +101,7 @@ export default function MultiImagePicker({ defaultValue = [] }) {
 
       {/* Скрытое поле для передачи массива в Server Action (JSON строкой) */}
       <input type="hidden" name="images" value={JSON.stringify(images)} />
+      <input type="hidden" name="imageAlts" value={JSON.stringify(Object.fromEntries(images.map((url) => [url, alts[url] || ""])))} />
     </div>
   );
 }

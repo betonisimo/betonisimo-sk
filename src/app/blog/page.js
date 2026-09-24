@@ -2,20 +2,18 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import BlogCard from "@/components/blog/BlogCard";
+import { getSeo, pageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Blog o betónových plotoch",
-  description: "Praktické rady, tipy a inšpirácie k výberu, montáži a údržbe betónových plotov od BETONISSIMO.SK.",
-  alternates: { canonical: "/blog" },
-  openGraph: {
+export async function generateMetadata() {
+  const seo = await getSeo("page", "blog");
+  return pageMetadata(seo, {
     title: "Blog o betónových plotoch | BETONISSIMO.SK",
-    description: "Rady a inšpirácie k betónovým plotom, ich výberu a realizácii.",
-    url: "/blog",
-    type: "website",
-  },
-};
+    description: "Praktické rady, tipy a inšpirácie k výberu, montáži a údržbe betónových plotov od BETONISSIMO.SK.",
+    path: "/blog",
+  });
+}
 
 export default async function BlogPage() {
   const posts = await prisma.blogPost.findMany({

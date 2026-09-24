@@ -59,7 +59,7 @@ export default function PortfolioPreview({ projects }) {
                 <img
                   src={project.mainImage}
                   // СУПЕР SEO-ХАК ДЛЯ ЛОКАЛЬНЫХ КЛИЕНТОВ:
-                  alt={`Betónový plot ${project.location ? 'montáž ' + project.location : ''} - ${project.title}`}
+                  alt={project.seo?.imageAlts?.[project.mainImage] || `Betónový plot ${project.location ? 'montáž ' + project.location : ''} - ${project.title}`}
                   loading="lazy"
                   className="w-full h-full object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110"
                 />

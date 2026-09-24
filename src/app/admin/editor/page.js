@@ -11,6 +11,8 @@ import DeleteAllCollectionsBtn from "@/components/admin/DeleteAllCollectionsBtn"
 import FooterEditor from "@/components/admin/FooterEditor";
 import HeroEditor from "@/components/admin/HeroEditor"; 
 import AnalyticsManager from "@/components/admin/AnalyticsManager";
+import PageSeoEditor from "@/components/admin/PageSeoEditor";
+import { getSeoMany, seoSection } from "@/lib/seo";
 
 function SectionHeader({ title, subtitle, actions }) {
   return (
@@ -36,7 +38,8 @@ export default async function EditorPage() {
     servicesData,
     reviewsData,
     benefitsData,
-    scriptSettings // Добавляем получение настроек скриптов
+    scriptSettings, // Добавляем получение настроек скриптов
+    pageSeoRows
   ] = await Promise.all([
     getContent("global", "footer"),
     getContent("domov", "hero"),
@@ -48,14 +51,19 @@ export default async function EditorPage() {
     getContent("domov", "domov-sluzby"),
     getContent("domov", "domov-recenzie"),
     getContent("global", "vyhody"),
-    prisma.globalSettings.findUnique({ where: { key: "analytics_scripts" } })
+    prisma.globalSettings.findUnique({ where: { key: "analytics_scripts" } }),
+    getSeoMany("page", ["home", "katalog", "doplnky", "realizacie", "kontakt", "blog"])
   ]);
+  const pageSeo = Object.fromEntries(
+    ["home", "katalog", "doplnky", "realizacie", "kontakt", "blog"].map((key) => [key, pageSeoRows.get(seoSection("page", key)) || {}])
+  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-40 flex flex-col font-sans text-slate-900">
       <EditorHeader title="INDUSTRIAL_CONTROL_PANEL" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 mt-16 space-y-24 w-full">
+        <PageSeoEditor settings={pageSeo} />
         
         {/* --- HERO SECTION EDITOR --- */}
         <div id="hero-admin" className="bg-white rounded-[2px] shadow-xl overflow-hidden">

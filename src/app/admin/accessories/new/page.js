@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { createAccessory } from "@/actions/adminActions";
 import GalleryPicker from "@/components/admin/GalleryPicker";
+import SeoFields from "@/components/admin/SeoFields";
 
 export default function NewAccessoryPage() {
   const router = useRouter();
@@ -23,6 +24,9 @@ export default function NewAccessoryPage() {
       price: formData.get("price"),
       gallery: formData.get("gallery"),
       description: formData.get("description"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
+      imageAlts: formData.get("imageAlts"),
     });
 
     if (!result.success) {
@@ -115,6 +119,8 @@ export default function NewAccessoryPage() {
                   />
                 </div>
               </div>
+
+              <SeoFields />
 
               <div className="mt-12 flex justify-end border-t border-black pt-12">
                 <button

@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { deleteAccessory, updateAccessory } from "@/actions/adminActions";
 import GalleryPicker from "@/components/admin/GalleryPicker";
+import SeoFields from "@/components/admin/SeoFields";
 import { prisma } from "@/lib/prisma";
+import { getSeo } from "@/lib/seo";
 
 export default async function EditAccessoryPage({ params }) {
   const { id } = await params;
@@ -13,6 +15,7 @@ export default async function EditAccessoryPage({ params }) {
   });
 
   if (!accessory) return <div>Doplnok nebol nájdený.</div>;
+  const seo = await getSeo("accessory", accessory.id);
 
   async function handleSave(formData) {
     "use server";
@@ -22,6 +25,9 @@ export default async function EditAccessoryPage({ params }) {
       price: formData.get("price"),
       gallery: formData.get("gallery"),
       description: formData.get("description"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
+      imageAlts: formData.get("imageAlts"),
     });
 
     if (!result.success) throw new Error(result.error);
@@ -54,7 +60,7 @@ export default async function EditAccessoryPage({ params }) {
           <form action={handleSave}>
             <div className="border-b border-slate-200 bg-slate-50 p-6">
               <label className="mb-4 block text-[10px] font-black uppercase tracking-widest text-slate-500">Galéria obrázkov</label>
-              <GalleryPicker defaultImages={defaultGallery} />
+              <GalleryPicker defaultImages={defaultGallery} defaultAlts={seo.imageAlts || {}} />
             </div>
 
             <div className="space-y-6 p-8 md:p-12">
@@ -93,6 +99,8 @@ export default async function EditAccessoryPage({ params }) {
                   <textarea name="description" defaultValue={accessory.description} required rows={8} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none" />
                 </div>
               </div>
+
+              <SeoFields seo={seo} />
 
               <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-8">
                 <button formAction={handleDelete} className="flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-red-500 transition-colors hover:bg-red-50">

@@ -39,7 +39,7 @@ export default function AccessoryGrid({ accessories }) {
               >
                 <Image
                   src={accessory.mainImage || "/og-image.jpg"}
-                  alt={`${accessory.title} - doplnok k oploteniu`}
+                  alt={accessory.seo?.imageAlts?.[accessory.mainImage] || `${accessory.title} - doplnok k oploteniu`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="z-0 object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"

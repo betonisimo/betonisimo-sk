@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
 import { SITE_URL } from "@/lib/site-url";
+import { getSeo, imageAlt } from "@/lib/seo";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
 export async function generateMetadata({ params }) {
@@ -15,22 +16,25 @@ export async function generateMetadata({ params }) {
 
   if (!collection) return { title: "Katalóg nenájdený | Beton-SK" };
 
-  const title = `Katalóg: ${collection.title} | BETONISSIMO.SK`;
-  const description = collection.description?.substring(0, 155) + "..." || `Objavte našu prémiovú kolekciu betónových plotov ${collection.title}. ${collection.subtitle}. Kvalita a dizajn, ktorý vydrží.`;
+  const seo = await getSeo("collection", collection.id);
+  const title = seo.title || `Katalóg: ${collection.title} | BETONISSIMO.SK`;
+  const description = seo.description || (collection.description?.trim() ? collection.description.trim().slice(0, 155) : `Objavte našu prémiovú kolekciu betónových plotov ${collection.title}. ${collection.subtitle}.`);
+  const url = `/katalog/${encodeURIComponent(collection.slug)}`;
 
   return {
-    alternates: { canonical: `/katalog/${encodeURIComponent(collection.slug)}` },
-    title: title,
+    alternates: { canonical: url },
+    title: { absolute: title },
     description: description,
     openGraph: {
       title: title,
       description: description,
+      url,
       images: [
         {
           url: collection.mainImage || "/og-image.jpg",
           width: 1200,
           height: 630,
-          alt: `Betónový plot ${collection.title}`,
+          alt: imageAlt(seo, collection.mainImage, `Betónový plot ${collection.title}`),
         },
       ],
     },
@@ -46,6 +50,7 @@ export default async function CollectionPage({ params }) {
   });
 
   if (!collection) notFound();
+  const seo = await getSeo("collection", collection.id);
 
   const benefitsData = await getContent("global", "vyhody");
   const b = benefitsData || {
@@ -104,7 +109,7 @@ export default async function CollectionPage({ params }) {
 
             {/* LAVA ČASŤ: Галерея (Слайдер) */}
             <div className="lg:w-[55%] xl:w-[60%] h-[60vh] lg:h-full min-h-0 flex flex-col mb-4 lg:mb-0">
-              <CollectionGallery images={allImages} title={collection.title} />
+              <CollectionGallery images={allImages} title={collection.title} imageAlts={seo.imageAlts || {}} />
             </div>
 
             {/* PRAVÁ ČASŤ: Контент */}

@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import GalleryPicker from "@/components/admin/GalleryPicker"; // ИМПОРТ НОВОГО КОМПОНЕНТА
+import SeoFields from "@/components/admin/SeoFields";
+import { getSeo } from "@/lib/seo";
 
 export default async function EditCollectionPage({ params }) {
   const resolvedParams = await params;
@@ -15,6 +17,7 @@ export default async function EditCollectionPage({ params }) {
   });
 
   if (!collection) return <div>katalog nebol nájdeni</div>;
+  const seo = await getSeo("collection", collection.id);
 
   async function handleSave(formData) {
     "use server";
@@ -23,8 +26,12 @@ export default async function EditCollectionPage({ params }) {
       subtitle: formData.get("subtitle"),
       gallery: formData.get("gallery"), // БЕРЕМ СТРОКУ ИЗ GALLERY PICKER
       description: formData.get("description"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
+      imageAlts: formData.get("imageAlts"),
     };
-    await updateCollection(id, data);
+    const result = await updateCollection(id, data);
+    if (!result.success) throw new Error(result.error || "Kolekciu sa nepodarilo uložiť.");
     revalidatePath("/admin/editor");
     revalidatePath(`/katalog/${collection.slug}`);
     redirect("/admin/editor#kolekcie");
@@ -55,7 +62,7 @@ export default async function EditCollectionPage({ params }) {
             {/* ИСПОЛЬЗУЕМ НОВЫЙ GALLERY PICKER С ДАННЫМИ ИЗ БАЗЫ */}
             <div className="border-b border-slate-200 bg-slate-50 p-6">
                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">Galéria obrázkov</label>
-               <GalleryPicker defaultImages={defaultGallery} />
+               <GalleryPicker defaultImages={defaultGallery} defaultAlts={seo.imageAlts || {}} />
             </div>
 
             <div className="p-8 md:p-12 space-y-6">
@@ -98,6 +105,8 @@ export default async function EditCollectionPage({ params }) {
                   />
                 </div>
               </div>
+
+              <SeoFields seo={seo} />
 
               {/* Кнопки */}
               <div className="pt-8 mt-8 border-t border-slate-100 flex items-center justify-between">

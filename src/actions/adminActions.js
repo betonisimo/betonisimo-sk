@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { put } from '@vercel/blob';
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
+import { getSeoMany, seoSection, writeSeo } from "@/lib/seo";
 
 /**
  * СОХРАНЕНИЕ ОБЩЕГО КОНТЕНТА (Hero, Footer, About и т.д.)
@@ -80,7 +81,9 @@ export async function getContent(stranka, sekcia) {
  */
 export async function getCollections() {
   try {
-    return await prisma.collection.findMany({ orderBy: { id: 'asc' } });
+    const collections = await prisma.collection.findMany({ orderBy: { id: 'asc' } });
+    const seo = await getSeoMany("collection", collections.map((collection) => collection.id));
+    return collections.map((collection) => ({ ...collection, seo: seo.get(seoSection("collection", collection.id)) || {} }));
   } catch (error) {
     return [];
   }
@@ -113,15 +116,19 @@ export async function createCollection(data) {
 
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
-    const newCollection = await prisma.collection.create({
-      data: { 
-        title: data.title,
-        subtitle: data.subtitle,
-        description: data.description,
-        mainImage: mainImage,
-        gallery: galleryArray,
-        slug: finalSlug 
-      },
+    const newCollection = await prisma.$transaction(async (tx) => {
+      const collection = await tx.collection.create({
+        data: {
+          title: data.title,
+          subtitle: data.subtitle,
+          description: data.description,
+          mainImage,
+          gallery: galleryArray,
+          slug: finalSlug,
+        },
+      });
+      await writeSeo(tx, "collection", collection.id, data, galleryArray);
+      return collection;
     });
     
     // Сброс кэша
@@ -147,15 +154,19 @@ export async function updateCollection(id, data) {
 
     const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
 
-    const updated = await prisma.collection.update({
-      where: { id: Number(id) },
-      data: {
-        title: data.title,
-        subtitle: data.subtitle,
-        description: data.description,
-        mainImage: mainImage,
-        gallery: galleryArray,
-      },
+    const updated = await prisma.$transaction(async (tx) => {
+      const collection = await tx.collection.update({
+        where: { id: Number(id) },
+        data: {
+          title: data.title,
+          subtitle: data.subtitle,
+          description: data.description,
+          mainImage,
+          gallery: galleryArray,
+        },
+      });
+      await writeSeo(tx, "collection", collection.id, data, galleryArray);
+      return collection;
     });
     
     // Сброс кэша
@@ -175,7 +186,10 @@ export async function deleteCollection(id) {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    await prisma.collection.delete({ where: { id: Number(id) } });
+    await prisma.$transaction([
+      prisma.collection.delete({ where: { id: Number(id) } }),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("collection", id) } }),
+    ]);
     
     // Сброс кэша
     revalidatePath("/");
@@ -194,7 +208,10 @@ export async function deleteAllCollectionsAction() {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    await prisma.collection.deleteMany({});
+    await prisma.$transaction([
+      prisma.collection.deleteMany({}),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: { startsWith: "seo-collection-" } } }),
+    ]);
     
     // Сброс кэша
     revalidatePath("/");
@@ -213,10 +230,12 @@ export async function deleteAllCollectionsAction() {
 export async function getAccessories() {
   try {
     const accessories = await prisma.accessory.findMany({ orderBy: { id: 'asc' } });
+    const seo = await getSeoMany("accessory", accessories.map((accessory) => accessory.id));
 
     return accessories.map((accessory) => ({
       ...accessory,
       price: accessory.price.toString(),
+      seo: seo.get(seoSection("accessory", accessory.id)) || {},
     }));
   } catch (error) {
     console.error("Chyba pri načítaní doplnkov:", error);
@@ -253,16 +272,20 @@ export async function createAccessory(data) {
       return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
     }
 
-    const accessory = await prisma.accessory.create({
-      data: {
-        title: data.title,
-        subtitle: data.subtitle,
-        description: data.description,
-        price,
-        mainImage,
-        gallery: galleryArray,
-        slug: finalSlug,
-      },
+    const accessory = await prisma.$transaction(async (tx) => {
+      const created = await tx.accessory.create({
+        data: {
+          title: data.title,
+          subtitle: data.subtitle,
+          description: data.description,
+          price,
+          mainImage,
+          gallery: galleryArray,
+          slug: finalSlug,
+        },
+      });
+      await writeSeo(tx, "accessory", created.id, data, galleryArray);
+      return created;
     });
 
     revalidatePath("/doplnky");
@@ -290,16 +313,20 @@ export async function updateAccessory(id, data) {
       return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
     }
 
-    const accessory = await prisma.accessory.update({
-      where: { id: Number(id) },
-      data: {
-        title: data.title,
-        subtitle: data.subtitle,
-        description: data.description,
-        price,
-        mainImage,
-        gallery: galleryArray,
-      },
+    const accessory = await prisma.$transaction(async (tx) => {
+      const updated = await tx.accessory.update({
+        where: { id: Number(id) },
+        data: {
+          title: data.title,
+          subtitle: data.subtitle,
+          description: data.description,
+          price,
+          mainImage,
+          gallery: galleryArray,
+        },
+      });
+      await writeSeo(tx, "accessory", updated.id, data, galleryArray);
+      return updated;
     });
 
     revalidatePath("/doplnky");
@@ -318,7 +345,10 @@ export async function deleteAccessory(id) {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    await prisma.accessory.delete({ where: { id: Number(id) } });
+    await prisma.$transaction([
+      prisma.accessory.delete({ where: { id: Number(id) } }),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("accessory", id) } }),
+    ]);
     revalidatePath("/doplnky");
     revalidatePath("/admin/editor");
     revalidatePath("/sitemap.xml");
@@ -352,8 +382,20 @@ export async function createProject(data) {
 
     let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
     
-    const newProject = await prisma.project.create({
-      data: { ...data, slug: finalSlug, images: parsedImages },
+    const newProject = await prisma.$transaction(async (tx) => {
+      const project = await tx.project.create({
+        data: {
+          title: data.title,
+          category: data.category,
+          location: data.location,
+          description: data.description,
+          mainImage: data.mainImage,
+          slug: finalSlug,
+          images: parsedImages,
+        },
+      });
+      await writeSeo(tx, "project", project.id, data, [data.mainImage, ...parsedImages]);
+      return project;
     });
     
     // Сброс кэша
@@ -374,9 +416,20 @@ export async function updateProject(id, data) {
   try {
     let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
 
-    const updatedProject = await prisma.project.update({
-      where: { id: Number(id) },
-      data: { ...data, images: parsedImages },
+    const updatedProject = await prisma.$transaction(async (tx) => {
+      const project = await tx.project.update({
+        where: { id: Number(id) },
+        data: {
+          title: data.title,
+          category: data.category,
+          location: data.location,
+          description: data.description,
+          mainImage: data.mainImage,
+          images: parsedImages,
+        },
+      });
+      await writeSeo(tx, "project", project.id, data, [data.mainImage, ...parsedImages]);
+      return project;
     });
 
     // Сброс кэша
@@ -396,7 +449,10 @@ export async function deleteProject(id) {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    await prisma.project.delete({ where: { id: Number(id) } });
+    await prisma.$transaction([
+      prisma.project.delete({ where: { id: Number(id) } }),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("project", id) } }),
+    ]);
     
     // Сброс кэша
     revalidatePath("/");

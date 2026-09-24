@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, Calendar, ShieldCheck, Box } from "lucide-react";
 import ProjectGallery from "@/components/portfolio/ProjectGallery";
 import { SITE_URL } from "@/lib/site-url";
+import { getSeo, imageAlt } from "@/lib/seo";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО ПРОЕКТА
 export async function generateMetadata({ params }) {
@@ -16,24 +17,27 @@ export async function generateMetadata({ params }) {
 
   // Формируем SEO-заголовок, учитывающий локацию (Город)
   const locationText = project.location ? `v meste ${project.location}` : "na Slovensku";
-  const title = `Realizácia: ${project.title} | BETONISSIMO.SK`;  
+  const seo = await getSeo("project", project.id);
+  const title = seo.title || `Realizácia: ${project.title} | BETONISSIMO.SK`;
   // Обрезаем описание для Google (макс 160 символов)
-  const description = project.description?.substring(0, 155) + "..." || `Pozrite si našu najnovšiu realizáciu betónového plotu ${locationText}. Prémiová kvalita a rýchla montáž.`;
+  const description = seo.description || (project.description?.trim() ? project.description.trim().slice(0, 155) : `Pozrite si našu najnovšiu realizáciu betónového plotu ${locationText}. Prémiová kvalita a rýchla montáž.`);
+  const url = `/projekt/${encodeURIComponent(project.slug)}`;
 
   return {
-    title: title,
+    title: { absolute: title },
     description: description,
-    alternates: { canonical: `/projekt/${encodeURIComponent(project.slug)}` },
+    alternates: { canonical: url },
     openGraph: {
       title: title,
       description: description,
+      url,
       // Если есть фото, подтягиваем его в WhatsApp/Facebook, иначе дефолтное
       images: [
         {
           url: project.mainImage || "/og-image.jpg",
           width: 1200,
           height: 630,
-          alt: project.title,
+          alt: imageAlt(seo, project.mainImage, project.title),
         },
       ],
     },
@@ -49,6 +53,7 @@ export default async function ProjectPage({ params }) {
   });
 
   if (!project) notFound();
+  const seo = await getSeo("project", project.id);
 
   // 2. SCHEMA.ORG ДЛЯ ПРОЕКТА (CreativeWork / ImageGallery)
   // Это говорит Google: "Эй, это выполненная работа с кучей фоток"
@@ -187,7 +192,7 @@ export default async function ProjectPage({ params }) {
                  </h2>
               </div>
               
-              <ProjectGallery images={project.images} title={project.title} />
+              <ProjectGallery images={project.images} title={project.title} imageAlts={seo.imageAlts || {}} />
             </div>
           </div>
 

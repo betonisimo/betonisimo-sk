@@ -6,6 +6,7 @@ import { createCollection } from "@/actions/adminActions";
 import Link from "next/link";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import GalleryPicker from "@/components/admin/GalleryPicker";
+import SeoFields from "@/components/admin/SeoFields";
 
 export default function NewCollectionPage() {
   const router = useRouter();
@@ -23,10 +24,14 @@ export default function NewCollectionPage() {
       subtitle: formData.get("subtitle"),
       gallery: formData.get("gallery"),
       description: formData.get("description"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
+      imageAlts: formData.get("imageAlts"),
     };
 
     try {
-      await createCollection(data);
+      const result = await createCollection(data);
+      if (!result.success) throw new Error(result.error || "Kolekciu sa nepodarilo uložiť.");
       router.refresh(); // Сбрасываем кэш, чтобы новые данные появились в админке
       router.push("/admin/editor#kolekcie"); // Перенаправляем пользователя
     } catch (error) {
@@ -105,6 +110,8 @@ export default function NewCollectionPage() {
                   />
                 </div>
               </div>
+
+              <SeoFields />
 
               <div className="pt-12 mt-12 border-t border-black flex justify-end">
                 <button 

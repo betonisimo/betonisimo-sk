@@ -9,7 +9,8 @@ const defaultData = {
   odstavec1: "Pôsobíme na slovenskom trhu od roku 2009. Našou základnou prioritou je spokojnosť zákazníka.",
   odstavec2: "Betónové ploty vyrábame technológiou liatia.",
   odstavec3: "Pôsobíme na Slovensku, v Rakúsku a Poľsku.",
-  obrazok: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=2070"
+  obrazok: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?q=80&w=2070",
+  obrazokAlt: "Výroba a montáž betónových plotov"
 };
 
 export default function About({ editMode = false, dbData = defaultData }) {
@@ -38,11 +39,20 @@ export default function About({ editMode = false, dbData = defaultData }) {
     formData.append("file", file);
     const uploadResult = await uploadImage(formData);
     if (uploadResult.success) {
-      const updatedContent = { ...content, obrazok: uploadResult.url };
+      const updatedContent = { ...content, obrazok: uploadResult.url, obrazokAlt: "" };
       setContent(updatedContent);
       await saveContent("domov", "domov-o-nas", updatedContent);
     }
     setIsUploading(false);
+  };
+
+  const handleAltBlur = async (event) => {
+    const alt = event.target.value.trim().slice(0, 180);
+    if (alt !== content.obrazokAlt) {
+      const updatedContent = { ...content, obrazokAlt: alt };
+      setContent(updatedContent);
+      await saveContent("domov", "domov-o-nas", updatedContent);
+    }
   };
 
   const getEditableProps = (field) => {
@@ -133,7 +143,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
             {/* ЧИСТАЯ АНИМАЦИЯ: 800ms, scale-100 -> 110, гарантия цвета */}
             <Image
               src={content.obrazok || defaultData.obrazok}
-              alt="Elite Industrial About"
+              alt={content.obrazokAlt || "Výroba a montáž betónových plotov"}
               fill
               className={`object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110 ${isUploading ? 'opacity-30 blur-md' : ''}`}
             />
@@ -142,6 +152,13 @@ export default function About({ editMode = false, dbData = defaultData }) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-60 transition-opacity duration-[800ms] group-hover:opacity-20 pointer-events-none z-10"></div>
             
           </div>
+
+          {editMode && (
+            <label className="block text-sm font-bold text-slate-700 lg:col-start-8 lg:col-span-5">
+              Popis fotografie (alt)
+              <input key={content.obrazok} type="text" maxLength={180} defaultValue={content.obrazokAlt || ""} onBlur={handleAltBlur} placeholder="Čo je na fotografii?" className="mt-2 w-full border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-red-600" />
+            </label>
+          )}
 
         </div>
       </div>

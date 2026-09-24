@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import ImagePicker from "@/components/admin/ImagePicker";
 import MultiImagePicker from "@/components/admin/MultiImagePicker";
+import SeoFields from "@/components/admin/SeoFields";
 
 export default function NewProjectPage() {
 
@@ -17,8 +18,13 @@ export default function NewProjectPage() {
       description: formData.get("description"),
       mainImage: formData.get("mainImage"),
       images: formData.get("images"), 
+      mainImageAlt: formData.get("mainImageAlt"),
+      imageAlts: formData.get("imageAlts"),
+      seoTitle: formData.get("seoTitle"),
+      seoDescription: formData.get("seoDescription"),
     };
-    await createProject(data);
+    const result = await createProject(data);
+    if (!result.success) throw new Error(result.error || "Projekt sa nepodarilo uložiť.");
     
     revalidatePath("/");
     revalidatePath("/realizacie");
@@ -117,6 +123,8 @@ export default function NewProjectPage() {
                    <MultiImagePicker defaultValue={[]} />
                 </div>
               </div>
+
+              <SeoFields />
 
               {/* SAVE BUTTON */}
               <div className="pt-12 mt-12 border-t border-black flex justify-end">

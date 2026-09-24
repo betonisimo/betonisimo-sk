@@ -13,6 +13,7 @@ const DEFAULT_HERO_DATA = {
   title_end: "PLOTY",
   description: "Zvyšujeme hodnotu vašej nehnuteľnosti plotmi, ktoré vydržia generácie.",
   bg_image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070",
+  bg_image_alt: "Betónové ploty",
   cta1_text: "Prezrieť katalógu",
   cta1_link: "/katalog",
   show_cta1: true,
@@ -112,7 +113,7 @@ export default function HeroEditor({ dbData }) {
     try {
       const res = await uploadImageAction(formData);
       if (res.success) {
-        setData((prev) => ({ ...prev, bg_image: res.url }));
+        setData((prev) => ({ ...prev, bg_image: res.url, bg_image_alt: "" }));
       } else {
         alert("Chyba pri nahrávaní: " + res.error);
       }
@@ -320,6 +321,10 @@ export default function HeroEditor({ dbData }) {
                   className="w-full bg-white/5 border border-white/10 p-3 text-[9px] text-slate-400 font-mono outline-none" 
                 />
             </div>
+            <label className="block space-y-2 relative z-10 text-[8px] font-black uppercase tracking-widest text-slate-400">
+              Popis fotografie (alt)
+              <input name="bg_image_alt" maxLength={180} value={data.bg_image_alt || ""} onChange={handleChange} placeholder="Čo je na fotografii?" className="w-full border border-white/10 bg-white/5 p-3 text-xs normal-case text-white outline-none focus:border-red-600" />
+            </label>
           </div>
         </div>
 

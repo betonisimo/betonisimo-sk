@@ -5,6 +5,7 @@ import { getContent } from "@/actions/adminActions";
 import CollectionGallery from "@/components/catalog/CollectionGallery";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site-url";
+import { getSeo, imageAlt } from "@/lib/seo";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -12,21 +13,24 @@ export async function generateMetadata({ params }) {
 
   if (!accessory) return { title: "Doplnok nebol nájdený | BETONISSIMO.SK" };
 
-  const title = `${accessory.title} – doplnok k oploteniu | BETONISSIMO.SK`;
-  const description = accessory.description?.slice(0, 155) || `${accessory.title} – kvalitný doplnok k betónovému oploteniu.`;
+  const seo = await getSeo("accessory", accessory.id);
+  const title = seo.title || `${accessory.title} – doplnok k oploteniu | BETONISSIMO.SK`;
+  const description = seo.description || accessory.description?.slice(0, 155) || `${accessory.title} – kvalitný doplnok k betónovému oploteniu.`;
+  const url = `/doplnky/${encodeURIComponent(accessory.slug)}`;
 
   return {
-    alternates: { canonical: `/doplnky/${encodeURIComponent(accessory.slug)}` },
-    title,
+    alternates: { canonical: url },
+    title: { absolute: title },
     description,
     openGraph: {
       title,
       description,
+      url,
       images: [{
         url: accessory.mainImage || "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: accessory.title,
+        alt: imageAlt(seo, accessory.mainImage, accessory.title),
       }],
     },
   };
@@ -37,6 +41,7 @@ export default async function AccessoryPage({ params }) {
   const accessory = await prisma.accessory.findUnique({ where: { slug } });
 
   if (!accessory) notFound();
+  const seo = await getSeo("accessory", accessory.id);
 
   const benefitsData = await getContent("global", "vyhody");
   const benefits = benefitsData || {
@@ -93,7 +98,7 @@ export default async function AccessoryPage({ params }) {
 
           <div className="flex h-full min-h-0 flex-1 flex-col gap-8 lg:flex-row lg:gap-16">
             <div className="mb-4 flex h-[60vh] min-h-0 flex-col lg:mb-0 lg:h-full lg:w-[55%] xl:w-[60%]">
-              <CollectionGallery images={images} title={accessory.title} />
+              <CollectionGallery images={images} title={accessory.title} imageAlts={seo.imageAlts || {}} />
             </div>
 
             <div className="h-auto overflow-y-visible pb-10 pr-0 lg:h-full lg:w-[45%] lg:overflow-y-auto lg:pr-4 xl:w-[40%]">

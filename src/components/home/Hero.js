@@ -12,6 +12,7 @@ const DEFAULT_HERO_DATA = {
   title_end: "PLOTY",
   description: "Zvyšujeme hodnotu vašej nehnuteľnosti plotmi, ktoré vydržia generácie.",
   bg_image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070",
+  bg_image_alt: "Betónové ploty",
   cta1_text: "Prezrieť katalógu",
   cta1_link: "/katalog",
   show_cta1: true,
@@ -54,7 +55,7 @@ export default async function Hero() {
       <div className="absolute inset-0 z-0">
         <Image 
           src={d.bg_image} 
-          alt="Betónové ploty"
+          alt={d.bg_image_alt || "Betónové ploty"}
           fill
           priority
           className="object-cover scale-105 animate-slow-zoom"

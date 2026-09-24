@@ -1,7 +1,13 @@
 export const dynamic = "force-dynamic";
-export const metadata = {
-  alternates: { canonical: "/kontakt" },
-};
+import { getSeo, pageMetadata } from "@/lib/seo";
+export async function generateMetadata() {
+  const seo = await getSeo("page", "kontakt");
+  return pageMetadata(seo, {
+    title: "Kontakt | BETONISSIMO.SK",
+    description: "Kontaktujte BETONISSIMO.SK pre návrh, cenu a montáž betónového plotu na Slovensku.",
+    path: "/kontakt",
+  });
+}
 import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
 export default async function KontaktPage() {

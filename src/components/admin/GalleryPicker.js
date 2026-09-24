@@ -4,8 +4,9 @@ import { Loader2, ImagePlus, X, Star } from "lucide-react"; // ДОБАВИЛИ 
 import { uploadImageAction } from "@/actions/adminActions";
 import imageCompression from "browser-image-compression";
 
-export default function GalleryPicker({ defaultImages = [] }) {
+export default function GalleryPicker({ defaultImages = [], defaultAlts = {} }) {
   const [images, setImages] = useState(defaultImages);
+  const [alts, setAlts] = useState(defaultAlts);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -64,11 +65,13 @@ export default function GalleryPicker({ defaultImages = [] }) {
   return (
     <div className="w-full">
       <input type="hidden" name="gallery" value={images.join(",")} />
+      <input type="hidden" name="imageAlts" value={JSON.stringify(Object.fromEntries(images.map((url) => [url, alts[url] || ""])))} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         {images.map((img, idx) => (
-          <div key={idx} className="relative aspect-square rounded-[2px] overflow-hidden group bg-slate-100 border border-slate-200">
-            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+          <div key={idx} className="relative rounded-[2px] overflow-hidden group bg-slate-100 border border-slate-200">
+            <div className="relative aspect-square">
+              <img src={img} alt={alts[img] || `Fotografia ${idx + 1}`} className="w-full h-full object-cover" />
             
             {/* КНОПКА УДАЛЕНИЯ */}
             <button
@@ -93,6 +96,11 @@ export default function GalleryPicker({ defaultImages = [] }) {
                 Dať ako hlavnú
               </button>
             )}
+            </div>
+            <label className="block p-2 text-[10px] font-bold text-slate-600">
+              Popis fotografie (alt)
+              <input type="text" maxLength={180} value={alts[img] || ""} onChange={(event) => setAlts((current) => ({ ...current, [img]: event.target.value }))} placeholder="Čo je na fotografii?" className="mt-1 w-full border border-slate-200 bg-white px-2 py-2 text-xs text-slate-900 outline-none focus:border-red-600" />
+            </label>
           </div>
         ))}
         
@@ -123,7 +131,7 @@ export default function GalleryPicker({ defaultImages = [] }) {
       />
       
       <p className="text-[10px] text-slate-400 font-mono mt-2">
-        // Fotografie sa automaticky komprimujú (max 1920px). Prvý obrázok so štítkom "HLAVNÁ" bude použitý ako náhľad.
+        {'// Fotografie sa automaticky komprimujú (max 1920px). Prvý obrázok so štítkom "HLAVNÁ" bude použitý ako náhľad.'}
       </p>
     </div>
   );

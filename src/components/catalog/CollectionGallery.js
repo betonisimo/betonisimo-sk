@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom"; // ИМПОРТИРУЕМ ПОРТАЛ
 import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 
-export default function CollectionGallery({ images, title }) {
+export default function CollectionGallery({ images, title, imageAlts = {} }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [mounted, setMounted] = useState(false); // Нужно для работы портала в Next.js
@@ -49,7 +49,7 @@ export default function CollectionGallery({ images, title }) {
         
         <img
           src={safeImages[currentIndex]}
-          alt={`${title} - foto ${currentIndex + 1}`}
+          alt={imageAlts[safeImages[currentIndex]] || `${title} - foto ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-all duration-500 ease-in-out"
         />
         
@@ -76,7 +76,7 @@ export default function CollectionGallery({ images, title }) {
                 : "opacity-60  hover:opacity-100 hover:-0"
             }`}
           >
-            <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+            <img src={img} alt={imageAlts[img] || `${title} - foto ${idx + 1}`} className="w-full h-full object-cover" />
             {currentIndex === idx && (
               <div className="absolute inset-0 bg-[#dc2626]/20"></div>
             )}
@@ -105,7 +105,7 @@ export default function CollectionGallery({ images, title }) {
           <div className="relative w-full h-full flex items-center justify-center p-0 lg:p-12 mt-12 lg:mt-0">
             <img
               src={safeImages[currentIndex]}
-              alt={`${title} - fullscreen`}
+              alt={imageAlts[safeImages[currentIndex]] || `${title} - foto ${currentIndex + 1}`}
               className="max-w-full max-h-full object-contain select-none"
             />
           </div>
