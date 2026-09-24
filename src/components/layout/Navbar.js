@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Kontakt", href: "/kontakt" },
   { name: "Vzory", href: "/katalog" },
   { name: "Doplnky", href: "/doplnky" },
+  { name: "Blog", href: "/blog" },
 ];
 
 const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
@@ -32,12 +33,12 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
           </div>
 
           {/* Десктопное меню */}
-          <div className="hidden items-center gap-5 min-[901px]:flex lg:gap-8">
+          <div className="hidden items-center gap-3 min-[901px]:flex xl:gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-slate-700 transition-colors hover:text-red-600"
+                className="whitespace-nowrap text-[13px] font-medium text-slate-700 transition-colors hover:text-red-600 xl:text-sm"
               >
                 {link.name}
               </Link>
@@ -46,7 +47,7 @@ const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {
             {showPhone && phone && (
               <a
                 href={phoneHref}
-                className="inline-flex items-center gap-2 whitespace-nowrap border-l border-slate-200 pl-4 text-sm font-black text-slate-900 transition-colors hover:text-[#dc2626] lg:pl-6"
+                className="inline-flex items-center gap-2 whitespace-nowrap border-l border-slate-200 pl-3 text-[13px] font-black text-slate-900 transition-colors hover:text-[#dc2626] xl:pl-5 xl:text-sm"
                 aria-label={`Zavolať na číslo ${phone}`}
               >
                 <Phone size={16} className="text-[#dc2626]" />

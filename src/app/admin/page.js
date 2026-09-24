@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, MessageSquare, Phone, Home, Package, Settings, Edit3 } from "lucide-react";
+import { LayoutDashboard, Phone, Home, Newspaper } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboard() {
@@ -20,6 +20,13 @@ export default async function AdminDashboard() {
       icon: <Phone size={24} />,
       href: "/admin/kontakt",
       color: "bg-red-500"
+    },
+    {
+      title: "Blog",
+      desc: "Samostatná správa článkov, fotografií a publikovania",
+      icon: <Newspaper size={24} />,
+      href: "/admin/blog",
+      color: "bg-slate-900"
     }
   ];
 

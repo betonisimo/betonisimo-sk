@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site-url";
 
+export const dynamic = "force-dynamic";
+
 const baseUrl = SITE_URL;
 
 export default async function sitemap() {
@@ -38,11 +40,17 @@ export default async function sitemap() {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
   ];
 
   try {
     // �������� ������ �� ����
-    const [collections, projects, accessories] =
+    const [collections, projects, accessories, posts] =
       await Promise.all([
         prisma.collection.findMany({
           select: { slug: true },
@@ -54,6 +62,10 @@ export default async function sitemap() {
 
         prisma.accessory.findMany({
           select: { slug: true },
+        }),
+        prisma.blogPost.findMany({
+          where: { status: "PUBLISHED" },
+          select: { slug: true, updatedAt: true },
         }),
       ]);
 
@@ -81,11 +93,19 @@ export default async function sitemap() {
       priority: 0.8,
     }));
 
+    const blogUrls = posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
     return [
       ...staticPages,
       ...collectionUrls,
       ...accessoryUrls,
       ...projectUrls,
+      ...blogUrls,
     ];
 
   } catch (error) {

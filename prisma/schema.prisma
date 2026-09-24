@@ -90,3 +90,21 @@ model GlobalSettings {
   key   String  @unique // например, "scripts"
   value String? @db.Text // Сюда будем сохранять <script>...</script>
 }
+
+model BlogPost {
+  id             Int       @id @default(autoincrement())
+  slug           String    @unique
+  title          String
+  excerpt        String    @db.VarChar(320)
+  coverImage     String
+  coverAlt       String
+  blocks         Json
+  seoTitle       String?
+  seoDescription String?   @db.VarChar(320)
+  status         String    @default("DRAFT")
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, publishedAt])
+}
