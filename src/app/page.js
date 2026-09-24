@@ -13,7 +13,7 @@ export const metadata = {
   title: "BETTONISSIMO - Betónové ploty a záhradné doplnky | Kvalita a dizajn pre váš domov",
   description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Tradičná kvalita, moderný dizajn.",
   alternates: {
-    canonical: "https://betonissimo.sk/", 
+    canonical: "/",
   },
 };
 

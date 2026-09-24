@@ -6,6 +6,7 @@ import StyleGrid from "@/components/home/StyleGrid";
 export const metadata = {
   title: "Kompletný katalóg línií | BETONISSIMO.SK",
   description: "Prezrite si všetky naše línie a štýly betónových plotov. Od moderných hladkých línií až po textúry štiepaného kameňa.",
+  alternates: { canonical: "/katalog" },
 };
 
 export default async function KatalogPage() {

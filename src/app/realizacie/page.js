@@ -5,6 +5,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 export const metadata = {
   title: "Portfólio Realizácií | Elite Industrial",
   description: "Technická dokumentácia našich dokončených projektov betónových oplotení.",
+  alternates: { canonical: "/realizacie" },
 };
 
 export default async function PortfolioPage() {

@@ -7,13 +7,14 @@ import { prisma } from "@/lib/prisma";
 import Script from "next/script";
 import AdminScripts from "@/components/admin/AdminScripts";
 import CookieBanner from "@/components/CookieBanner";
+import { SITE_URL } from "@/lib/site-url";
 const inter = Inter({
   subsets: ["latin-ext"],
   display: 'swap',
   variable: '--font-inter',
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://betonissimo.sk";
+const baseUrl = SITE_URL;
 
 export const metadata = {
   metadataBase: new URL(baseUrl),

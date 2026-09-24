@@ -1,4 +1,7 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  alternates: { canonical: "/kontakt" },
+};
 import { getContent } from "@/actions/adminActions";
 import KontaktClient from "@/components/contact/KontaktClient";
 export default async function KontaktPage() {

@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { getContent } from "@/actions/adminActions";
 import CollectionGallery from "@/components/catalog/CollectionGallery";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/site-url";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }) {
   const description = accessory.description?.slice(0, 155) || `${accessory.title} – kvalitný doplnok k betónovému oploteniu.`;
 
   return {
-    metadataBase: new URL("https://betonissimo.sk"),
+    alternates: { canonical: `/doplnky/${encodeURIComponent(accessory.slug)}` },
     title,
     description,
     openGraph: {
@@ -58,7 +59,7 @@ export default async function AccessoryPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: accessory.title,
-    image: accessory.mainImage || "https://betonissimo.sk/og-image.jpg",
+    image: accessory.mainImage || `${SITE_URL}/og-image.jpg`,
     description: accessory.description,
     brand: {
       "@type": "Brand",

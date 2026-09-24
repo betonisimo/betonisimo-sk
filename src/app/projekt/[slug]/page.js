@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Calendar, ShieldCheck, Box } from "lucide-react";
 import ProjectGallery from "@/components/portfolio/ProjectGallery";
+import { SITE_URL } from "@/lib/site-url";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО ПРОЕКТА
 export async function generateMetadata({ params }) {
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }) {
   return {
     title: title,
     description: description,
+    alternates: { canonical: `/projekt/${encodeURIComponent(project.slug)}` },
     openGraph: {
       title: title,
       description: description,
@@ -55,7 +57,7 @@ export default async function ProjectPage({ params }) {
     "@type": "CreativeWork",
     "name": project.title,
     "description": project.description,
-    "image": project.mainImage || "https://betonissimo.sk/og-image.jpg",
+    "image": project.mainImage || `${SITE_URL}/og-image.jpg`,
     "creator": {
       "@type": "Organization",
       "name": "BART Complex s.r.o."

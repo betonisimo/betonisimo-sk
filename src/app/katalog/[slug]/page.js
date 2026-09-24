@@ -4,6 +4,7 @@ import { getContent } from "@/actions/adminActions";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
+import { SITE_URL } from "@/lib/site-url";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
 export async function generateMetadata({ params }) {
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }) {
   const description = collection.description?.substring(0, 155) + "..." || `Objavte našu prémiovú kolekciu betónových plotov ${collection.title}. ${collection.subtitle}. Kvalita a dizajn, ktorý vydrží.`;
 
   return {
-    metadataBase: new URL('https://betonissimo.sk'),
+    alternates: { canonical: `/katalog/${encodeURIComponent(collection.slug)}` },
     title: title,
     description: description,
     openGraph: {
@@ -64,7 +65,7 @@ export default async function CollectionPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": `Betónový plot - ${collection.title}`,
-    "image": collection.mainImage || "https://betonissimo.sk/og-image.jpg",
+    "image": collection.mainImage || `${SITE_URL}/og-image.jpg`,
     "description": collection.description,
     "brand": {
       "@type": "Brand",

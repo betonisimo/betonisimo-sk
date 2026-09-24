@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/site-url";
 
-const baseUrl = "https://betonissimo.sk";
+const baseUrl = SITE_URL;
 
 export default async function sitemap() {
   const now = new Date();
@@ -12,6 +13,12 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: "daily",
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/katalog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/realizacie`,
