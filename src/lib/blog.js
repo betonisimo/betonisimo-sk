@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { contentText } from "@/lib/rich-content";
 import { prisma } from "@/lib/prisma";
 
 export const getPublishedBlogPost = cache(async (slug) => {
@@ -17,13 +18,6 @@ export function formatBlogDate(date) {
 }
 
 export function blogReadingMinutes(blocks) {
-  const words = (Array.isArray(blocks) ? blocks : [])
-    .filter((block) => block?.type !== "image")
-    .map((block) => block?.text || "")
-    .join(" ")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-
+  const words = contentText(blocks).split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 }

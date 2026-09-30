@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import RichContent from "@/components/content/RichContent";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Calendar, ShieldCheck, Box } from "lucide-react";
@@ -79,7 +80,7 @@ export default async function ProjectPage({ params }) {
       {/* Внедряем JSON-LD скрыто от пользователя, только для роботов */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       
       <div className="bg-[#f8fafc] min-h-screen pt-32 md:pt-44 pb-24 font-sans text-slate-900 overflow-hidden">
@@ -102,7 +103,7 @@ export default async function ProjectPage({ params }) {
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <span className="bg-[#dc2626]/10 text-[#dc2626] px-3 py-1 text-[10px] font-black uppercase tracking-[0.4em] rounded-[2px]">
-                    // PROJEKT_ID: {project.id.toString().slice(-3).padStart(3, '0')}
+                    {'// PROJEKT_ID: '}{project.id.toString().slice(-3).padStart(3, '0')}
                   </span>
                 </div>
                 {/* h1 остается главным ключом страницы */}
@@ -112,9 +113,7 @@ export default async function ProjectPage({ params }) {
               </div>
 
               <div className="max-w-3xl">
-                <p className="text-xl md:text-2xl text-slate-600 leading-relaxed font-medium italic border-l-4 border-[#dc2626] pl-6 md:pl-8 whitespace-pre-wrap rounded-l-[2px]">
-                  {project.description}
-                </p>
+                {project.content ? <RichContent content={project.content} /> : <p className="text-xl md:text-2xl text-slate-600 leading-relaxed font-medium italic border-l-4 border-[#dc2626] pl-6 md:pl-8 whitespace-pre-wrap rounded-l-[2px]">{project.description}</p>}
               </div>
             </div>
 

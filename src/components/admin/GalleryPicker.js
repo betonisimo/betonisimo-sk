@@ -1,138 +1,68 @@
 "use client";
-import { useState, useRef } from "react";
-import { Loader2, ImagePlus, X, Star } from "lucide-react"; // ДОБАВИЛИ ИКОНКУ STAR
-import { uploadImageAction } from "@/actions/adminActions";
-import imageCompression from "browser-image-compression";
+/* eslint-disable @next/next/no-img-element -- Admin image previews. */
+import { useRef, useState } from "react";
+import { ImagePlus, Loader2, Star, Trash2, ArrowLeft, ArrowRight } from "lucide-react";
+import { uploadEditorImage } from "@/lib/upload-image-client";
+import { buttonClass, inputClass } from "./AdminFormUI";
 
-export default function GalleryPicker({ defaultImages = [], defaultAlts = {} }) {
-  const [images, setImages] = useState(defaultImages);
+export default function GalleryPicker({
+  defaultImages = [], defaultAlts = {}, name = "gallery", altsName = "imageAlts",
+  encoding = "csv", featured = true, maxImages = 24, disabled = false, onUpload, onChange,
+}) {
+  const [images, setImages] = useState(defaultImages.filter(Boolean));
   const [alts, setAlts] = useState(defaultAlts);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    setIsUploading(true);
-    
-    const compressionOptions = {
-      maxSizeMB: 0.8,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-      fileType: "image/webp"
-    };
-    
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const lock = useRef(false);
+  const input = useRef(null);
+  function change(nextImages, nextAlts = alts) {
+    setImages(nextImages);
+    setAlts(nextAlts);
+    onChange?.(nextImages, nextAlts);
+  }
+  async function upload(files) {
+    if (!files.length || lock.current) return;
+    if (maxImages > 1 && images.length + files.length > maxImages) { setError(`Môžete pridať najviac ${maxImages} fotografií.`); return; }
+    lock.current = true;
+    setUploading(true);
+    setError("");
+    onUpload?.(1);
+    let next = [...images];
     try {
-      const uploadedUrls = [];
-      
       for (const file of files) {
-        const compressedFile = await imageCompression(file, compressionOptions);
-        const formData = new FormData();
-        formData.append("file", compressedFile, file.name.replace(/\.[^/.]+$/, ".webp")); 
-        
-        const res = await uploadImageAction(formData);
-        if (res.success && res.url) {
-          uploadedUrls.push(res.url);
-        }
+        const url = await uploadEditorImage(file);
+        next = maxImages === 1 ? [url] : [...next, url];
+        change(next);
       }
-      
-      setImages((prev) => [...prev, ...uploadedUrls]);
-    } catch (error) {
-      console.error("Chyba pri nahrávaní:", error);
-      alert("Nepodarilo sa nahrať obrázky.");
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const removeImage = (indexToRemove) => {
-    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
-
-  // НОВАЯ ФУНКЦИЯ: СДЕЛАТЬ ФОТО ГЛАВНЫМ (ПЕРЕМЕСТИТЬ В НАЧАЛО)
-  const makeMain = (index) => {
-    if (index === 0) return; // Оно уже главное
-    setImages((prev) => {
-      const newArray = [...prev];
-      const selectedImage = newArray.splice(index, 1)[0]; // Вырезаем фотку
-      newArray.unshift(selectedImage); // Вставляем в самое начало
-      return newArray;
-    });
-  };
-
-  return (
-    <div className="w-full">
-      <input type="hidden" name="gallery" value={images.join(",")} />
-      <input type="hidden" name="imageAlts" value={JSON.stringify(Object.fromEntries(images.map((url) => [url, alts[url] || ""])))} />
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-        {images.map((img, idx) => (
-          <div key={idx} className="relative rounded-[2px] overflow-hidden group bg-slate-100 border border-slate-200">
-            <div className="relative aspect-square">
-              <img src={img} alt={alts[img] || `Fotografia ${idx + 1}`} className="w-full h-full object-cover" />
-            
-            {/* КНОПКА УДАЛЕНИЯ */}
-            <button
-              type="button"
-              onClick={() => removeImage(idx)}
-              className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-[2px] opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
-            >
-              <X size={14} />
-            </button>
-
-            {/* МЕТКА ИЛИ КНОПКА "СДЕЛАТЬ ГЛАВНОЙ" */}
-            {idx === 0 ? (
-              <span className="absolute bottom-2 left-2 bg-black text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px] z-10 flex items-center gap-1">
-                <Star size={10} className="fill-white" /> Hlavná
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => makeMain(idx)}
-                className="absolute bottom-2 left-2 bg-slate-900/90 hover:bg-[#dc2626] text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px] opacity-0 group-hover:opacity-100 transition-all z-10"
-              >
-                Dať ako hlavnú
-              </button>
-            )}
-            </div>
-            <label className="block p-2 text-[10px] font-bold text-slate-600">
-              Popis fotografie (alt)
-              <input type="text" maxLength={180} value={alts[img] || ""} onChange={(event) => setAlts((current) => ({ ...current, [img]: event.target.value }))} placeholder="Čo je na fotografii?" className="mt-1 w-full border border-slate-200 bg-white px-2 py-2 text-xs text-slate-900 outline-none focus:border-red-600" />
-            </label>
-          </div>
-        ))}
-        
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 rounded-[2px] bg-slate-50 hover:bg-slate-100 transition-colors text-slate-500 disabled:opacity-50"
-        >
-          {isUploading ? (
-            <Loader2 size={24} className="animate-spin text-red-600" />
-          ) : (
-            <ImagePlus size={24} />
-          )}
-          <span className="text-[10px] font-bold uppercase tracking-widest">
-             {isUploading ? "Nahrávam..." : "Pridať foto"}
-          </span>
-        </button>
-      </div>
-
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        className="hidden"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-      />
-      
-      <p className="text-[10px] text-slate-400 font-mono mt-2">
-        {'// Fotografie sa automaticky komprimujú (max 1920px). Prvý obrázok so štítkom "HLAVNÁ" bude použitý ako náhľad.'}
-      </p>
+    } catch (error) { setError(error.message || "Nahrávanie zlyhalo."); }
+    finally { lock.current = false; setUploading(false); onUpload?.(-1); if (input.current) input.current.value = ""; }
+  }
+  const isDisabled = disabled || uploading;
+  function move(index, target) {
+    const next = [...images];
+    next.splice(target, 0, next.splice(index, 1)[0]);
+    change(next);
+  }
+  return <div>
+    <input type="hidden" name={name} value={encoding === "json" ? JSON.stringify(images) : encoding === "single" ? images[0] || "" : images.join(",")} />
+    <input type="hidden" name={altsName} value={encoding === "single" ? alts[images[0]] || "" : JSON.stringify(Object.fromEntries(images.map((url) => [url, alts[url] || ""])))} />
+    <div className={maxImages === 1 ? "max-w-xl" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+      {images.map((url, index) => <div key={url} className="mb-3 min-w-0 border border-slate-200 bg-slate-50 p-3">
+        <div className="relative mb-3 aspect-[4/3] bg-slate-100"><img src={url} alt={alts[url] || ""} className="h-full w-full object-contain" />{featured && index === 0 && <span className="absolute bottom-2 left-2 flex items-center gap-1 bg-slate-950 px-2 py-1 text-xs font-bold text-white"><Star size={12} /> Hlavná</span>}</div>
+        <label className="block text-sm font-bold">Popis fotografie (alt)<input className={inputClass + " mt-2 !px-2 !text-sm"} disabled={isDisabled} value={alts[url] || ""} maxLength={180} placeholder="Čo je na fotografii?" onChange={(e) => change(images, { ...alts, [url]: e.target.value })} /></label>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {featured && index > 0 && <button type="button" disabled={isDisabled} onClick={() => move(index, 0)} className={buttonClass + " !p-2 !text-xs"}>Dať ako hlavnú</button>}
+          {!featured && maxImages > 1 && <>
+            <button type="button" aria-label={`Posunúť fotografiu ${index + 1} vyššie`} disabled={isDisabled || index === 0} className={buttonClass + " !p-2"} onClick={() => move(index, index - 1)}><ArrowLeft size={16} /></button>
+            <button type="button" aria-label={`Posunúť fotografiu ${index + 1} nižšie`} disabled={isDisabled || index === images.length - 1} className={buttonClass + " !p-2"} onClick={() => move(index, index + 1)}><ArrowRight size={16} /></button>
+          </>}
+          <button type="button" disabled={isDisabled} onClick={() => change(images.filter((_, i) => i !== index))} className={buttonClass + " !p-2 text-red-600"} aria-label={`Odstrániť fotografiu ${index + 1}`}><Trash2 size={16} /></button>
+        </div>
+      </div>)}
     </div>
-  );
+    <button type="button" disabled={isDisabled || (maxImages !== 1 && images.length >= maxImages)} onClick={() => input.current?.click()} className={buttonClass}>{uploading ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}{uploading ? "Nahrávam…" : maxImages === 1 && images.length ? "Vymeniť fotografiu" : "Pridať fotografiu"}</button>
+    <input ref={input} aria-label={`Nahrať fotografie: ${name}`} type="file" multiple={maxImages > 1} accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={isDisabled} onChange={(e) => upload(Array.from(e.target.files || []))} />
+    <p className="mt-3 text-xs leading-5 text-slate-500">JPG, PNG, WebP, do 20 MB. Automatická kompresia na šírku najviac 1920 px.{featured && ' Prvá fotografia je hlavná.'}</p>
+    {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-600">{error}</p>}
+  </div>;
 }

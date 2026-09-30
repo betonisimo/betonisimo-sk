@@ -4,11 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/*.test.mjs",
+    "test:editor": "playwright test"
   },
   "dependencies": {
+    "@blocknote/ariakit": "^0.55.0",
+    "@blocknote/core": "^0.55.0",
+    "@blocknote/react": "^0.55.0",
     "@prisma/client": "^6.19.3",
     "@vercel/blob": "^2.3.3",
     "browser-image-compression": "^2.0.2",
@@ -24,6 +29,7 @@
     "yet-another-react-lightbox": "^3.31.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",

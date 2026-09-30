@@ -69,7 +69,8 @@ model Project {
   title       String // Название (например: "Betónový plot 2m")
   slug        String   @unique // Ссылка (betonovy-plot-2m)
   category    String // Стиль (Moderné línie)
-  description String   @db.Text // Описание проекта
+  description String   @db.Text // Plain-text fallback and SEO summary
+  content     Json? // Versioned rich content; null for existing realizations
   mainImage   String // Главное фото для карточки
   images      String[] // Массив ссылок для галереи
   location    String? // Город (Bratislava, Trnava...)

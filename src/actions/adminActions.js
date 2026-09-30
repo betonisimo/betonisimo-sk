@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { put } from '@vercel/blob';
+import { uploadImage } from "@/actions/uploadActions";
+import { cleanCatalog, cleanProject, validId } from "@/lib/admin-item-validation";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { getSeoMany, seoSection, writeSeo } from "@/lib/seo";
@@ -42,23 +43,7 @@ export async function saveContent(stranka, sekcia, obsah) {
  * ЭКШЕН ДЛЯ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ (Vercel Blob)
  */
 export async function uploadImageAction(formData) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized: Only admins can upload images.");
-
-  try {
-    const file = formData.get('file');
-    if (!file) throw new Error("Súbor nebol nájdený");
-
-    const blob = await put(file.name, file, { 
-      access: 'public',
-      addRandomSuffix: true
-    });
-
-    return { success: true, url: blob.url };
-  } catch (error) {
-    console.error("Upload Error:", error);
-    return { success: false, error: error.message };
-  }
+  return uploadImage(formData);
 }
 
 /**
@@ -76,391 +61,100 @@ export async function getContent(stranka, sekcia) {
   }
 }
 
-/**
- * КОЛЛЕКЦИИ (СТИЛИ)
- */
+const itemPaths = { collection: "/katalog", accessory: "/doplnky", project: "/projekt" };
+
+function refreshItem(kind, slug) {
+  revalidatePath("/");
+  revalidatePath(kind === "project" ? "/realizacie" : itemPaths[kind]);
+  if (slug) revalidatePath(`${itemPaths[kind]}/${slug}`);
+  revalidatePath("/admin/editor");
+  revalidatePath("/sitemap.xml");
+}
+
+async function saveItem(kind, id, input) {
+  if (!await getServerSession()) return { success: false, error: "Prihláste sa do administrácie." };
+  try {
+    const data = kind === "project" ? cleanProject(input) : cleanCatalog(input, kind);
+    const itemId = id == null ? null : validId(id);
+    if (itemId == null) {
+      const base = data.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || kind;
+      let slug = base;
+      let suffix = 2;
+      while (await prisma[kind].findUnique({ where: { slug }, select: { id: true } })) slug = `${base}-${suffix++}`;
+      data.slug = slug;
+    }
+    const item = await prisma.$transaction(async (tx) => {
+      const saved = itemId == null ? await tx[kind].create({ data }) : await tx[kind].update({ where: { id: itemId }, data });
+      await writeSeo(tx, kind, saved.id, input, kind === "project" ? [data.mainImage, ...data.images] : data.gallery);
+      return saved;
+    });
+    refreshItem(kind, item.slug);
+    return { success: true, data: { id: item.id, slug: item.slug } };
+  } catch (error) {
+    if (error.code) {
+      console.error("Item save failed:", error.code);
+      return { success: false, error: error.code === "P2002" ? "Záznam s touto adresou už existuje. Skúste uloženie znova." : "Záznam sa nepodarilo uložiť. Skontrolujte databázu a skúste znova." };
+    }
+    return { success: false, error: error.message || "Záznam sa nepodarilo uložiť." };
+  }
+}
+
+async function removeItem(kind, id) {
+  if (!await getServerSession()) return { success: false, error: "Prihláste sa do administrácie." };
+  try {
+    const itemId = validId(id);
+    const [item] = await prisma.$transaction([
+      prisma[kind].delete({ where: { id: itemId } }),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection(kind, itemId) } }),
+    ]);
+    refreshItem(kind, item.slug);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Záznam sa nepodarilo vymazať. Skúste to znova." };
+  }
+}
+
+export async function createCollection(data) { return saveItem("collection", null, data); }
+export async function updateCollection(id, data) { return saveItem("collection", id, data); }
+export async function deleteCollection(id) { return removeItem("collection", id); }
+export async function createAccessory(data) { return saveItem("accessory", null, data); }
+export async function updateAccessory(id, data) { return saveItem("accessory", id, data); }
+export async function deleteAccessory(id) { return removeItem("accessory", id); }
+export async function createProject(data) { return saveItem("project", null, data); }
+export async function updateProject(id, data) { return saveItem("project", id, data); }
+export async function deleteProject(id) { return removeItem("project", id); }
+
 export async function getCollections() {
   try {
-    const collections = await prisma.collection.findMany({ orderBy: { id: 'asc' } });
-    const seo = await getSeoMany("collection", collections.map((collection) => collection.id));
-    return collections.map((collection) => ({ ...collection, seo: seo.get(seoSection("collection", collection.id)) || {} }));
+    const items = await prisma.collection.findMany({ orderBy: { id: "asc" } });
+    const seo = await getSeoMany("collection", items.map((item) => item.id));
+    return items.map((item) => ({ ...item, seo: seo.get(seoSection("collection", item.id)) || {} }));
   } catch (error) {
+    console.error("Chyba pri načítaní vzorov:", error);
     return [];
   }
 }
 
-export async function createCollection(data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    const baseSlug = data.title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (await prisma.collection.findUnique({ where: { slug: finalSlug } })) {
-      finalSlug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    // Обработка массива галереи
-    let galleryArray = [];
-    if (typeof data.gallery === 'string') {
-      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
-    }
-
-    const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
-
-    const newCollection = await prisma.$transaction(async (tx) => {
-      const collection = await tx.collection.create({
-        data: {
-          title: data.title,
-          subtitle: data.subtitle,
-          description: data.description,
-          mainImage,
-          gallery: galleryArray,
-          slug: finalSlug,
-        },
-      });
-      await writeSeo(tx, "collection", collection.id, data, galleryArray);
-      return collection;
-    });
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); 
-    
-    return { success: true, data: newCollection };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function updateCollection(id, data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    let galleryArray = [];
-    if (typeof data.gallery === 'string') {
-      galleryArray = data.gallery.split(',').filter(url => url.trim() !== "");
-    }
-
-    const mainImage = galleryArray.length > 0 ? galleryArray[0] : (data.mainImage || "");
-
-    const updated = await prisma.$transaction(async (tx) => {
-      const collection = await tx.collection.update({
-        where: { id: Number(id) },
-        data: {
-          title: data.title,
-          subtitle: data.subtitle,
-          description: data.description,
-          mainImage,
-          gallery: galleryArray,
-        },
-      });
-      await writeSeo(tx, "collection", collection.id, data, galleryArray);
-      return collection;
-    });
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath(`/katalog/${updated.slug}`);
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true, data: updated };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function deleteCollection(id) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    await prisma.$transaction([
-      prisma.collection.delete({ where: { id: Number(id) } }),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("collection", id) } }),
-    ]);
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true };
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-// Удаление всех коллекций
-export async function deleteAllCollectionsAction() {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    await prisma.$transaction([
-      prisma.collection.deleteMany({}),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: { startsWith: "seo-collection-" } } }),
-    ]);
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/katalog");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e.message };
-  }
-}
-
-/**
- * DOPLNKY (AKSESUÁRE)
- */
 export async function getAccessories() {
   try {
-    const accessories = await prisma.accessory.findMany({ orderBy: { id: 'asc' } });
-    const seo = await getSeoMany("accessory", accessories.map((accessory) => accessory.id));
-
-    return accessories.map((accessory) => ({
-      ...accessory,
-      price: accessory.price.toString(),
-      seo: seo.get(seoSection("accessory", accessory.id)) || {},
-    }));
+    const items = await prisma.accessory.findMany({ orderBy: { id: "asc" } });
+    const seo = await getSeoMany("accessory", items.map((item) => item.id));
+    return items.map((item) => ({ ...item, price: item.price.toString(), seo: seo.get(seoSection("accessory", item.id)) || {} }));
   } catch (error) {
     console.error("Chyba pri načítaní doplnkov:", error);
     return [];
   }
 }
 
-export async function createAccessory(data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    const baseSlug = data.title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (await prisma.accessory.findUnique({ where: { slug: finalSlug } })) {
-      finalSlug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    const galleryArray = typeof data.gallery === 'string'
-      ? data.gallery.split(',').map((url) => url.trim()).filter(Boolean)
-      : [];
-    const mainImage = galleryArray[0] || data.mainImage || "";
-    const price = String(data.price ?? "").trim().replace(',', '.');
-
-    if (!/^\d+(\.\d{1,2})?$/.test(price)) {
-      return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
-    }
-
-    const accessory = await prisma.$transaction(async (tx) => {
-      const created = await tx.accessory.create({
-        data: {
-          title: data.title,
-          subtitle: data.subtitle,
-          description: data.description,
-          price,
-          mainImage,
-          gallery: galleryArray,
-          slug: finalSlug,
-        },
-      });
-      await writeSeo(tx, "accessory", created.id, data, galleryArray);
-      return created;
-    });
-
-    revalidatePath("/doplnky");
-    revalidatePath("/admin/editor");
-    revalidatePath("/sitemap.xml");
-
-    return { success: true, data: { id: accessory.id, slug: accessory.slug } };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function updateAccessory(id, data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    const galleryArray = typeof data.gallery === 'string'
-      ? data.gallery.split(',').map((url) => url.trim()).filter(Boolean)
-      : [];
-    const mainImage = galleryArray[0] || data.mainImage || "";
-    const price = String(data.price ?? "").trim().replace(',', '.');
-
-    if (!/^\d+(\.\d{1,2})?$/.test(price)) {
-      return { success: false, error: "Cena musí byť platné číslo s najviac dvoma desatinnými miestami." };
-    }
-
-    const accessory = await prisma.$transaction(async (tx) => {
-      const updated = await tx.accessory.update({
-        where: { id: Number(id) },
-        data: {
-          title: data.title,
-          subtitle: data.subtitle,
-          description: data.description,
-          price,
-          mainImage,
-          gallery: galleryArray,
-        },
-      });
-      await writeSeo(tx, "accessory", updated.id, data, galleryArray);
-      return updated;
-    });
-
-    revalidatePath("/doplnky");
-    revalidatePath(`/doplnky/${accessory.slug}`);
-    revalidatePath("/admin/editor");
-    revalidatePath("/sitemap.xml");
-
-    return { success: true, data: { id: accessory.id, slug: accessory.slug } };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function deleteAccessory(id) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
+export async function deleteAllCollectionsAction() {
+  if (!await getServerSession()) throw new Error("Unauthorized");
   try {
     await prisma.$transaction([
-      prisma.accessory.delete({ where: { id: Number(id) } }),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("accessory", id) } }),
+      prisma.collection.deleteMany({}),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: { startsWith: "seo-collection-" } } }),
     ]);
-    revalidatePath("/doplnky");
-    revalidatePath("/admin/editor");
-    revalidatePath("/sitemap.xml");
+    revalidatePath("/katalog", "layout");
+    refreshItem("collection");
     return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * ПРОЕКТЫ (РЕАЛИЗАЦИИ)
- */
-export async function createProject(data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    const baseSlug = data.title
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (await prisma.project.findUnique({ where: { slug: finalSlug } })) {
-      finalSlug = `${baseSlug}-${counter}`;
-      counter++;
-    }
-
-    let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
-    
-    const newProject = await prisma.$transaction(async (tx) => {
-      const project = await tx.project.create({
-        data: {
-          title: data.title,
-          category: data.category,
-          location: data.location,
-          description: data.description,
-          mainImage: data.mainImage,
-          slug: finalSlug,
-          images: parsedImages,
-        },
-      });
-      await writeSeo(tx, "project", project.id, data, [data.mainImage, ...parsedImages]);
-      return project;
-    });
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true, data: newProject };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function updateProject(id, data) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    let parsedImages = Array.isArray(data.images) ? data.images : JSON.parse(data.images || "[]");
-
-    const updatedProject = await prisma.$transaction(async (tx) => {
-      const project = await tx.project.update({
-        where: { id: Number(id) },
-        data: {
-          title: data.title,
-          category: data.category,
-          location: data.location,
-          description: data.description,
-          mainImage: data.mainImage,
-          images: parsedImages,
-        },
-      });
-      await writeSeo(tx, "project", project.id, data, [data.mainImage, ...parsedImages]);
-      return project;
-    });
-
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath(`/projekt/${updatedProject.slug}`);
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true, data: updatedProject };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function deleteProject(id) {
-  const session = await getServerSession();
-  if (!session) throw new Error("Unauthorized");
-
-  try {
-    await prisma.$transaction([
-      prisma.project.delete({ where: { id: Number(id) } }),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection("project", id) } }),
-    ]);
-    
-    // Сброс кэша
-    revalidatePath("/");
-    revalidatePath("/realizacie");
-    revalidatePath("/admin/editor"); // <-- Добавлено для админки
-    
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+  } catch { return { success: false, error: "Vzory sa nepodarilo vymazať." }; }
 }
