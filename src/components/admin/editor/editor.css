@@ -5,6 +5,9 @@
 .rich-editor .bn-block-content[data-content-type="heading"] { line-height: 1.3; }
 .rich-editor .bn-block-content[data-content-type="photo"] { display: block; width: 100%; }
 .rich-editor .editor-photo { width: 100%; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 2px; }
+/* BlockNote selects the whole photo node; keep its controls readable within that selection. */
+.rich-editor .editor-photo::selection,
+.rich-editor .editor-photo *::selection { color: #0f172a; background-color: transparent; }
 .rich-editor .editor-photo img { content-visibility: visible; height: auto; }
 .rich-editor .bn-editor a { color: #dc2626; text-decoration: underline; text-underline-offset: 3px; }
 .rich-editor .editor-link-button { padding: 8px; }
