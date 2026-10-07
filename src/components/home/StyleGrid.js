@@ -30,8 +30,8 @@ export default function StyleGrid({ collections, limit }) {
             </h2>
           </div>
           <p className="text-slate-500 text-sm font-medium uppercase tracking-tight max-w-sm leading-relaxed">
-            // Každý štýl definuje charakter vášho domova. <br />
-            // Od moderných línií po prírodný kameň.
+            {"// Každý štýl definuje charakter vášho domova."} <br />
+            {"// Od moderných línií po prírodný kameň."}
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export default function StyleGrid({ collections, limit }) {
             <Link
               href={`/katalog/${col.slug}`}
               key={col.id}
-              className="group relative flex flex-col justify-end aspect-[4/5] bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
+              className="group relative flex min-h-[26rem] flex-col justify-between gap-4 bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
             >
               {/* BACKGROUND IMAGE */}
               <img
@@ -55,16 +55,16 @@ export default function StyleGrid({ collections, limit }) {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-80 z-10 pointer-events-none"></div>
 
               {/* ID MARKER */}
-              <div className="absolute top-6 left-6 text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm z-20 transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
+              <div className="relative z-20 mt-6 ml-6 w-fit text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
                 LN_0{idx + 1}
               </div>
 
               {/* CONTENT AREA */}
-              <div className="relative z-20 p-6 md:p-8 flex flex-col">
-                <h3 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none transition-transform duration-500 group-hover:-translate-y-1">
+              <div className="relative z-20 flex min-w-0 flex-col px-6 pb-6 md:px-7 md:pb-7">
+                <h3 className="break-words text-2xl font-black text-white uppercase tracking-tighter leading-[1.05] transition-transform duration-500 group-hover:-translate-y-1 sm:text-3xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
                   {col.title}
                 </h3>
-                <p className="text-[#dc2626] text-[9px] font-black uppercase tracking-[0.3em] mt-3 mb-6 drop-shadow-md">
+                <p className="mt-3 mb-5 break-words text-[9px] font-black uppercase tracking-[0.16em] text-[#dc2626] drop-shadow-md">
                   {col.subtitle || "Standard Line"}
                 </p>
 

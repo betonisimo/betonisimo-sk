@@ -35,7 +35,7 @@ export default function AccessoryGrid({ accessories }) {
               <Link
                 href={`/doplnky/${accessory.slug}`}
                 key={accessory.id}
-                className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[2px] border border-slate-200/50 bg-slate-900 transition-shadow duration-500 hover:shadow-2xl"
+                className="group relative flex min-h-[26rem] flex-col justify-between gap-4 overflow-hidden rounded-[2px] border border-slate-200/50 bg-slate-900 transition-shadow duration-500 hover:shadow-2xl"
               >
                 <Image
                   src={accessory.mainImage || "/og-image.jpg"}
@@ -47,15 +47,15 @@ export default function AccessoryGrid({ accessories }) {
 
                 <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-80" />
 
-                <div className="absolute left-6 top-6 z-20 rounded-[2px] bg-black/40 px-2 py-1 font-mono text-[10px] font-bold tracking-widest text-white/70 backdrop-blur-sm transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
+                <div className="relative z-20 ml-6 mt-6 w-fit rounded-[2px] bg-black/40 px-2 py-1 font-mono text-[10px] font-bold tracking-widest text-white/70 backdrop-blur-sm transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
                   DP_{String(index + 1).padStart(2, "0")}
                 </div>
 
-                <div className="relative z-20 flex flex-col p-6 md:p-8">
-                  <h2 className="text-3xl font-black uppercase leading-none tracking-tighter text-white transition-transform duration-500 group-hover:-translate-y-1 md:text-4xl">
+                <div className="relative z-20 flex min-w-0 flex-col px-6 pb-6 md:px-7 md:pb-7">
+                  <h2 className="break-words text-2xl font-black uppercase leading-[1.05] tracking-tighter text-white transition-transform duration-500 group-hover:-translate-y-1 sm:text-3xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
                     {accessory.title}
                   </h2>
-                  <p className="mb-4 mt-3 text-[9px] font-black uppercase tracking-[0.3em] text-[#dc2626] drop-shadow-md">
+                  <p className="mb-4 mt-3 break-words text-[9px] font-black uppercase tracking-[0.16em] text-[#dc2626] drop-shadow-md">
                     {accessory.subtitle}
                   </p>
 
