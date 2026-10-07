@@ -77,7 +77,7 @@ export default async function AccessoryPage({ params }) {
       availability: "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
-        name: "BART Complex s.r.o.",
+        name: "BETONISSIMO.SK",
       },
     },
   };

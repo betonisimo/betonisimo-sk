@@ -23,8 +23,8 @@ export const metadata = {
     template: "%s | BETONISSIMO.SK"
   },
   description: "Zabezpečujeme predaj a profesionálnu montáž betónových plotov po celom Slovensku. Kvalitné oplotenie, ktoré vydrží generácie. Zameranie a nacenenie zdarma.",
-  keywords: ["betónové ploty", "betónový plot cena", "montáž plotov", "ploty na kľúč", "oplotenie Trnava", "BART Complex"],
-  authors: [{ name: "BART Complex s.r.o." }],
+  keywords: ["betónové ploty", "betónový plot cena", "montáž plotov", "ploty na kľúč", "oplotenie Trnava"],
+  authors: [{ name: "BETONISSIMO.SK" }],
 
   openGraph: {
     type: "website",
@@ -56,36 +56,12 @@ export const metadata = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness", // Zmenené na LocalBusiness pre lepšie výsledky v mapách
-  "name": "BART Complex s.r.o. - Betonissimo",
+  "@type": "Organization",
+  "name": "BETONISSIMO.SK",
   "image": `${baseUrl}/logo.png`,
   "@id": baseUrl,
   "url": baseUrl,
-  "telephone": "+421911640097", // Medzinárodný formát je lepší pre Google
-  "email": "info@beton-plotysk.sk",
-  "priceRange": "€€",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Novojelčanská 845/63",
-    "addressLocality": "Jelka",
-    "postalCode": "925 23",
-    "addressCountry": "SK"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 48.1438,
-    "longitude": 17.5028
-  },
-  "areaServed": {
-    "@type": "Country",
-    "name": "Slovakia"
-  },
-  "openingHoursSpecification": {
-    "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    "opens": "08:00",
-    "closes": "17:00"
-  }
+  "telephone": "+421911640097"
 };
 
 export default async function RootLayout({ children }) {

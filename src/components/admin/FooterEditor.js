@@ -5,11 +5,11 @@ import { Save } from "lucide-react";
 
 export default function FooterEditor({ dbData }) {
   const defaults = {
-    firma: "BART Complex s.r.o.", show_firma: true,
-    adresa: "Novojelčanská 845/63 925 23 Jelka", show_adresa: true,
-    ico: "51921979", show_ico: true,
-    dic: "2120839974", show_dic: true,
-    icdph: "SK2120839974", show_icdph: true,
+    firma: "BETONISSIMO.SK", show_firma: true,
+    adresa: "", show_adresa: false,
+    ico: "", show_ico: false,
+    dic: "", show_dic: false,
+    icdph: "", show_icdph: false,
     email1: "info@beton-plotysk.sk", show_email: true,
     tel: "0911 640 097", show_tel: true,
     fb_link: "https://www.facebook.com/", show_fb: true,

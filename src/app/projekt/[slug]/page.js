@@ -66,7 +66,7 @@ export default async function ProjectPage({ params }) {
     "image": project.mainImage || `${SITE_URL}/og-image.jpg`,
     "creator": {
       "@type": "Organization",
-      "name": "BART Complex s.r.o."
+      "name": "BETONISSIMO.SK"
     },
     "locationCreated": {
       "@type": "Place",

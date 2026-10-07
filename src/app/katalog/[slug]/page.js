@@ -4,7 +4,6 @@ import { getContent } from "@/actions/adminActions";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
-import { SITE_URL } from "@/lib/site-url";
 import { getSeo, imageAlt } from "@/lib/seo";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
@@ -65,33 +64,7 @@ export default async function CollectionPage({ params }) {
     ? collection.gallery
     : [collection.mainImage || "/uploads/default.webp"];
 
-  // 2. SCHEMA.ORG ДЛЯ ПРОДУКТА
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": `Betónový plot - ${collection.title}`,
-    "image": collection.mainImage || `${SITE_URL}/og-image.jpg`,
-    "description": collection.description,
-    "brand": {
-      "@type": "Brand",
-      "name": "BETONISSIMO.SK"
-    },
-    "offers": {
-      "@type": "AggregateOffer",
-      "priceCurrency": "EUR",
-      "availability": "https://schema.org/InStock",
-      "seller": {
-        "@type": "Organization",
-        "name": "BART Complex s.r.o."
-      }
-    }
-  };
-
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-
-      {/* ГЛАВНЫЙ КОНТЕЙНЕР: min-h-screen для мобилок, h-screen для ПК */}
       <div className="bg-[#f8fafc] min-h-screen lg:h-screen pt-24 pb-8 selection:bg-red-100 font-sans lg:overflow-hidden flex flex-col">
         <div className="max-w-[1600px] w-full mx-auto px-6 lg:px-8 flex-1 flex flex-col h-full">
 
@@ -101,7 +74,7 @@ export default async function CollectionPage({ params }) {
             className="group inline-flex items-center gap-4 text-[10px] font-black text-slate-400 mb-6 hover:text-[#dc2626] transition-all tracking-[0.3em] uppercase shrink-0"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" />
-            // Späť_do_katalógu
+            {"// Späť_do_katalógu"}
           </Link>
 
           {/* SPLIT SCREEN LAYOUT */}
@@ -118,7 +91,7 @@ export default async function CollectionPage({ params }) {
               <div className="space-y-10">
                 {/* Заголовок */}
                 <div className="space-y-4">
-                  <p className="text-[#dc2626] font-black uppercase tracking-[0.5em] text-[10px] mb-2">// Collection_Module</p>
+                  <p className="text-[#dc2626] font-black uppercase tracking-[0.5em] text-[10px] mb-2">{"// Collection_Module"}</p>
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-[0.85]">
                     {collection.title}
                   </h1>
@@ -193,6 +166,5 @@ export default async function CollectionPage({ params }) {
           </div>
         </div>
       </div>
-    </>
   );
 }
