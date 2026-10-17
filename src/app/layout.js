@@ -1,12 +1,11 @@
+/* eslint-disable @next/next/no-sync-scripts, @next/next/next-script-for-ga -- CookieYes must initialize before the requested GTM snippet in the HTML head. */
 // src/app/layout.js
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
-import Script from "next/script";
 import AdminScripts from "@/components/admin/AdminScripts";
-import CookieBanner from "@/components/CookieBanner";
 import { SITE_URL } from "@/lib/site-url";
 const inter = Inter({
   subsets: ["latin-ext"],
@@ -83,6 +82,19 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="sk" className={inter.variable} suppressHydrationWarning>
       <head>
+        <script
+          id="cookieyes"
+          type="text/javascript"
+          src="https://cdn-cookieyes.com/client_data/6627460f951d45e71eabce7519db090f/script.js"
+        ></script>
+        <script
+          id="google-tag-manager"
+          dangerouslySetInnerHTML={{ __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-55MXWFC7');` }}
+        ></script>
         {/* 1. Схема для Google (JSON-LD) */}
         <script
           type="application/ld+json"
@@ -92,11 +104,19 @@ export default async function RootLayout({ children }) {
       
       </head>
         <body className={`${inter.className} antialiased selection:bg-red-600 selection:text-white`}>
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-55MXWFC7"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager"
+            />
+          </noscript>
           <AdminScripts code={scriptSettings?.value} />
           <Navbar phone={navigationPhone} showPhone={showNavigationPhone} />
           <main>{children}</main>
           <Footer />
-          <CookieBanner /> {/* Подключаем сюда */}
         </body>
     </html>
   );
