@@ -88,7 +88,7 @@ export default async function Footer() {
               <div className="space-y-6">
                 <div className="bg-neutral-900/50 p-4 border-l-2 border-[#dc2626] rounded-[2px]">
                   <p className="text-[9px] font-black uppercase tracking-widest text-[#dc2626] mb-1">Status</p>
-                  <p className="text-xs font-bold uppercase tracking-tight">Fungujeme NON-STOP</p>
+                  <p className="text-xs font-bold uppercase tracking-tight">Napíšte nám kedykoľvek</p>
                 </div>
                 <div className="space-y-4">
                   {d.show_email && (

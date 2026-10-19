@@ -6,6 +6,7 @@ import { cleanCatalog, cleanProject, validId } from "@/lib/admin-item-validation
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { getSeoMany, seoSection, writeSeo } from "@/lib/seo";
+import { COLLECTION_SPECIFICATIONS_PREFIX, collectionSpecificationsSection, parseCollectionSpecifications } from "@/lib/collection-specifications";
 
 /**
  * СОХРАНЕНИЕ ОБЩЕГО КОНТЕНТА (Hero, Footer, About и т.д.)
@@ -75,6 +76,7 @@ async function saveItem(kind, id, input) {
   if (!await getServerSession()) return { success: false, error: "Prihláste sa do administrácie." };
   try {
     const data = kind === "project" ? cleanProject(input) : cleanCatalog(input, kind);
+    const specifications = kind === "collection" ? parseCollectionSpecifications(input) : undefined;
     const itemId = id == null ? null : validId(id);
     if (itemId == null) {
       const base = data.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || kind;
@@ -85,6 +87,14 @@ async function saveItem(kind, id, input) {
     }
     const item = await prisma.$transaction(async (tx) => {
       const saved = itemId == null ? await tx[kind].create({ data }) : await tx[kind].update({ where: { id: itemId }, data });
+      if (specifications) {
+        const sekcia = collectionSpecificationsSection(saved.id);
+        await tx.strankaObsah.upsert({
+          where: { sekcia },
+          update: { obsah: specifications },
+          create: { stranka: "collection", sekcia, obsah: specifications },
+        });
+      }
       await writeSeo(tx, kind, saved.id, input, kind === "project" ? [data.mainImage, ...data.images] : data.gallery);
       return saved;
     });
@@ -105,7 +115,7 @@ async function removeItem(kind, id) {
     const itemId = validId(id);
     const [item] = await prisma.$transaction([
       prisma[kind].delete({ where: { id: itemId } }),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: seoSection(kind, itemId) } }),
+      prisma.strankaObsah.deleteMany({ where: { sekcia: { in: [seoSection(kind, itemId), ...(kind === "collection" ? [collectionSpecificationsSection(itemId)] : [])] } } }),
     ]);
     refreshItem(kind, item.slug);
     return { success: true };
@@ -151,7 +161,10 @@ export async function deleteAllCollectionsAction() {
   try {
     await prisma.$transaction([
       prisma.collection.deleteMany({}),
-      prisma.strankaObsah.deleteMany({ where: { sekcia: { startsWith: "seo-collection-" } } }),
+      prisma.strankaObsah.deleteMany({ where: { OR: [
+        { sekcia: { startsWith: "seo-collection-" } },
+        { sekcia: { startsWith: COLLECTION_SPECIFICATIONS_PREFIX } },
+      ] } }),
     ]);
     revalidatePath("/katalog", "layout");
     refreshItem("collection");

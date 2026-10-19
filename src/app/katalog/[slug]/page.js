@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
 import { getSeo, imageAlt } from "@/lib/seo";
+import { collectionSpecificationsSection, resolveCollectionSpecifications } from "@/lib/collection-specifications";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
 export async function generateMetadata({ params }) {
@@ -49,15 +50,12 @@ export default async function CollectionPage({ params }) {
   });
 
   if (!collection) notFound();
-  const seo = await getSeo("collection", collection.id);
-
-  const benefitsData = await getContent("global", "vyhody");
-  const b = benefitsData || {
-    b1_title: "Zameranie plotu", b1_val: "ZDARMA",
-    b2_title: "Odborné poradenstvo", b2_val: "ZDARMA",
-    b3_title: "Cenová kalkulácia", b3_val: "ZDARMA",
-    b4_title: "Akciová zľava", b4_val: "-15%"
-  };
+  const [seo, benefitsData, storedSpecifications] = await Promise.all([
+    getSeo("collection", collection.id),
+    getContent("global", "vyhody"),
+    getContent("collection", collectionSpecificationsSection(collection.id)),
+  ]);
+  const specifications = resolveCollectionSpecifications(storedSpecifications, benefitsData);
 
   // Собираем картинки
   const allImages = collection.gallery?.length > 0
@@ -91,7 +89,6 @@ export default async function CollectionPage({ params }) {
               <div className="space-y-10">
                 {/* Заголовок */}
                 <div className="space-y-4">
-                  <p className="text-[#dc2626] font-black uppercase tracking-[0.5em] text-[10px] mb-2">{"// Collection_Module"}</p>
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-[0.85]">
                     {collection.title}
                   </h1>
@@ -118,28 +115,19 @@ export default async function CollectionPage({ params }) {
                   </div>
 
                   <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6 flex items-center gap-3">
-                    <Zap size={14} className="text-[#dc2626] fill-[#dc2626]" /> Technical_Specifications
+                    <Zap size={14} className="shrink-0 text-[#dc2626] fill-[#dc2626]" />
+                    <span className="min-w-0 break-words">{specifications.title}</span>
                   </h3>
 
                   <div className="grid grid-cols-2 gap-y-6 gap-x-6 relative z-10">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{b.b1_title}</span>
-                      <span className="text-base font-black text-slate-900 uppercase tracking-tighter font-mono">{b.b1_val}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{b.b2_title}</span>
-                      <span className="text-base font-black text-[#dc2626] uppercase tracking-tighter font-mono">{b.b2_val}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 pt-4 border-t border-slate-100">
-                      <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{b.b3_title}</span>
-                      <span className="text-base font-black text-[#dc2626] uppercase tracking-tighter font-mono">{b.b3_val}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 pt-4 border-t border-slate-100">
-                      <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{b.b4_title}</span>
-                      <span className="text-base font-black text-white bg-[#dc2626] px-2 py-1 rounded-[2px] w-fit font-mono">
-                        {b.b4_val}
-                      </span>
-                    </div>
+                    {specifications.items.map((item, index) => (
+                      <div key={index} className={`flex min-w-0 flex-col gap-1 ${index > 1 ? "pt-4 border-t border-slate-100" : ""}`}>
+                        <span className="break-words text-[9px] text-slate-400 uppercase font-black tracking-widest">{item.label}</span>
+                        <span className={`break-words text-base font-black uppercase tracking-tighter font-mono ${index === 0 ? "text-slate-900" : index === 3 ? "max-w-full text-white bg-[#dc2626] px-2 py-1 rounded-[2px] w-fit" : "text-[#dc2626]"}`}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -153,11 +141,6 @@ export default async function CollectionPage({ params }) {
                     <div className="absolute inset-0 bg-[#dc2626] translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                   </Link>
 
-                  <div className="flex items-center px-4 py-4 border border-slate-200 bg-white rounded-[2px] justify-center">
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-[0.2em]">
-                      Status: <span className="text-green-500 font-black ml-2">Available</span>
-                    </span>
-                  </div>
                 </div>
 
               </div>

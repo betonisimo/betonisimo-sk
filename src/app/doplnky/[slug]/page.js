@@ -104,7 +104,6 @@ export default async function AccessoryPage({ params }) {
             <div className="h-auto overflow-y-visible pb-10 pr-0 lg:h-full lg:w-[45%] lg:overflow-y-auto lg:pr-4 xl:w-[40%]">
               <div className="space-y-10">
                 <div className="space-y-4">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.5em] text-[#dc2626]">{"// Accessory_Module"}</p>
                   <h1 className="text-4xl font-black uppercase leading-[0.85] tracking-tighter text-slate-900 md:text-6xl lg:text-7xl">
                     {accessory.title}
                   </h1>

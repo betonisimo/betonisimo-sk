@@ -59,9 +59,6 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
             </div>
         </div>
 
-        <div className="absolute top-4 right-4 text-[10px] font-mono font-black text-white/90 tracking-widest bg-black/60 px-3 py-1.5 rounded-[2px] backdrop-blur-sm z-10 pointer-events-none">
-          IMG_0{currentIndex + 1}
-        </div>
       </div>
 
       {/* 2. МИНИАТЮРЫ */}

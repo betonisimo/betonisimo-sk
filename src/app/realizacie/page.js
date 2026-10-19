@@ -44,7 +44,7 @@ export default async function PortfolioPage() {
 
         {/* GRID REALIZÁCIÍ */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {projects.map((project, idx) => (
+          {projects.map((project) => (
             <Link
               href={`/projekt/${project.slug}`}
               key={project.id}
@@ -71,10 +71,6 @@ export default async function PortfolioPage() {
                 {/* ЛЕГКИЙ ОВЕРЛЕЙ (Рассеивается при наведении для взрыва цвета) */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-70 transition-opacity duration-[800ms] group-hover:opacity-0 pointer-events-none z-10"></div>
 
-                {/* ID MARKER */}
-                <div className="absolute top-0 right-0 bg-black/80 backdrop-blur-sm text-white text-[10px] font-mono px-3 py-1.5 rounded-bl-[2px] transition-colors duration-[800ms] group-hover:bg-[#dc2626] z-20">
-                  PRJ_{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
-                </div>
               </div>
 
               {/* CONTENT AREA */}

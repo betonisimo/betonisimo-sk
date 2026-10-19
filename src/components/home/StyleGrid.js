@@ -37,11 +37,11 @@ export default function StyleGrid({ collections, limit }) {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {displayCollections.map((col, idx) => (
+          {displayCollections.map((col) => (
             <Link
               href={`/katalog/${col.slug}`}
               key={col.id}
-              className="group relative flex min-h-[26rem] flex-col justify-between gap-4 bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
+              className="group relative flex min-h-[26rem] flex-col justify-end bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
             >
               {/* BACKGROUND IMAGE */}
               <img
@@ -54,13 +54,8 @@ export default function StyleGrid({ collections, limit }) {
               {/* GRADIENT OVERLAY */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-700 group-hover:opacity-80 z-10 pointer-events-none"></div>
 
-              {/* ID MARKER */}
-              <div className="relative z-20 mt-6 ml-6 w-fit text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
-                LN_0{idx + 1}
-              </div>
-
               {/* CONTENT AREA */}
-              <div className="relative z-20 flex min-w-0 flex-col px-6 pb-6 md:px-7 md:pb-7">
+              <div className="relative z-20 flex min-w-0 flex-col p-6 md:p-7">
                 <h3 className="break-words text-2xl font-black text-white uppercase tracking-tighter leading-[1.05] transition-transform duration-500 group-hover:-translate-y-1 sm:text-3xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
                   {col.title}
                 </h3>

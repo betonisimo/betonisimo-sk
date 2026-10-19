@@ -38,17 +38,12 @@ export default function PortfolioPreview({ projects }) {
 
         {/* GRID PROJEKTOV */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {projects.slice(0, 6).map((project, idx) => (
+          {projects.slice(0, 6).map((project) => (
             <Link 
               href={`/projekt/${project.slug}`} 
               key={project.id} 
               className="group relative bg-[#050505] rounded-[2px] transition-shadow duration-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.1)] overflow-hidden flex flex-col"
             >
-              {/* ТЕХНИЧЕСКИЙ ИНДЕКС */}
-              <div className="absolute top-6 left-6 z-20 text-[10px] font-mono font-bold text-white/50 bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm group-hover:bg-[#dc2626] group-hover:text-white transition-colors duration-500 uppercase tracking-widest">
-                // Ref_{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
-              </div>
-
               {/* КНОПКА ПЕРЕХОДА */}
               <div className="absolute top-6 right-6 z-20 opacity-0 group-hover:opacity-100 transition-all duration-500 -translate-y-2 group-hover:translate-y-0">
                 <ArrowUpRight size={24} className="text-[#dc2626]" />

@@ -101,11 +101,6 @@ export default async function ProjectPage({ params }) {
             {/* ЛЕВАЯ КОЛОНКА */}
             <div className="lg:col-span-8 space-y-12">
               <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="bg-[#dc2626]/10 text-[#dc2626] px-3 py-1 text-[10px] font-black uppercase tracking-[0.4em] rounded-[2px]">
-                    {'// PROJEKT_ID: '}{project.id.toString().slice(-3).padStart(3, '0')}
-                  </span>
-                </div>
                 {/* h1 остается главным ключом страницы */}
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 tracking-tighter uppercase leading-[0.85] break-words">
                   {project.title}
@@ -169,11 +164,6 @@ export default async function ProjectPage({ params }) {
                   </div> */}
                 </div>
 
-                <div className="pt-10 relative z-10">
-                  <div className="bg-slate-900 text-white p-4 text-center text-[10px] font-black uppercase tracking-[0.3em] rounded-[2px] shadow-inner transition-colors duration-[800ms] hover:bg-black">
-                    Certifikovaná kvalita
-                  </div>
-                </div>
               </div>
             </div>
           </div>

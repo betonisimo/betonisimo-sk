@@ -118,11 +118,6 @@ export default function About({ editMode = false, dbData = defaultData }) {
           {/* КАРТИНКА (5 колонок) */}
           <div className="lg:col-span-5 relative h-[500px] lg:h-[700px] w-full rounded-[2px] overflow-hidden group shadow-xl">
             
-            {/* ТЕХНИЧЕСКИЙ МАРКЕР */}
-            <div className="absolute top-6 left-6 text-[10px] font-mono font-bold text-white/70 tracking-widest bg-black/40 px-2 py-1 rounded-[2px] backdrop-blur-sm z-20 transition-colors duration-500 group-hover:bg-[#dc2626] group-hover:text-white">
-              REF_ABOUT
-            </div>
-
             {/* ПРОГРЕСС-БАР СНИЗУ */}
             <span className="absolute bottom-0 left-0 h-[3px] w-0 bg-[#dc2626] group-hover:w-full transition-all duration-[800ms] ease-out z-20"></span>
 
