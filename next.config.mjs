@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Доступ к dev-серверу с телефона через Radmin VPN.
+  allowedDevOrigins: ['26.112.238.59'],
+
   // 1. Настройки оптимизации изображений (next/image)
   images: {
     remotePatterns: [

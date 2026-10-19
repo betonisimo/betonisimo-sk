@@ -52,19 +52,6 @@ img {
   display: block !important;
 }
 
-/* LIGHTBOX (YARL) - AGRESÍVNY FIX */
-.yarl__slide_image {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-}
-
-.yarl__slide {
-  padding: 0 !important;
-}
-
 /* TLAČIDLÁ & INTERAKCIA */
 button, [role="button"] {
   cursor: pointer !important;

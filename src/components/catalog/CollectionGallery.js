@@ -1,19 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { createPortal } from "react-dom"; // ИМПОРТИРУЕМ ПОРТАЛ
 import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+
+const ZoomablePhoto = dynamic(() => import("@/components/shared/ZoomablePhoto"), { ssr: false });
 
 export default function CollectionGallery({ images, title, imageAlts = {} }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [mounted, setMounted] = useState(false); // Нужно для работы портала в Next.js
 
   const safeImages = images && images.length > 0 ? images : ["/uploads/default.webp"];
-
-  // Указываем, что компонент загрузился на клиенте (чтобы избежать ошибок SSR)
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Блокируем скролл страницы, когда открыт полноэкранный режим
   useEffect(() => {
@@ -41,8 +38,17 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
       
       {/* 1. ГЛАВНОЕ ФОТО */}
       <div 
+        role="button"
+        tabIndex={0}
+        aria-label="Zväčšiť fotografiu"
         className="relative flex-1 bg-slate-200 rounded-[2px] overflow-hidden shadow-2xl cursor-pointer group/main"
         onClick={() => setIsLightboxOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsLightboxOpen(true);
+          }
+        }}
       >
         <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#dc2626] z-10 opacity-50"></div>
         <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#dc2626] z-10 opacity-50"></div>
@@ -66,6 +72,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
         {safeImages.map((img, idx) => (
           <button
             key={idx}
+            aria-label={`Zobraziť fotografiu ${idx + 1}`}
             onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
             className={`relative h-full aspect-[4/3] rounded-[2px] overflow-hidden shrink-0 transition-all duration-300 ${
               currentIndex === idx 
@@ -82,8 +89,8 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
       </div>
 
       {/* ================= 3. ПОЛНОЭКРАННЫЙ LIGHTBOX (PORTAL) ================= */}
-      {isLightboxOpen && mounted && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center touch-none">
+      {isLightboxOpen && createPortal(
+        <div role="dialog" aria-modal="true" aria-label={`Fotografie: ${title}`} className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center touch-none">
           
           {/* Верхняя панель */}
           <div className="absolute top-0 left-0 right-0 p-4 lg:p-6 pt-safe flex items-center justify-between z-[110] bg-gradient-to-b from-black/80 to-transparent">
@@ -92,6 +99,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
             </div>
             <button 
               onClick={() => setIsLightboxOpen(false)}
+              aria-label="Zavrieť fotografiu"
               className="bg-white/10 hover:bg-[#dc2626] text-white p-2 rounded-[2px] transition-colors backdrop-blur-sm"
             >
               <X size={28} />
@@ -100,10 +108,10 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
 
           {/* Само фото */}
           <div className="relative w-full h-full flex items-center justify-center p-0 lg:p-12 mt-12 lg:mt-0">
-            <img
+            <ZoomablePhoto
+              key={currentIndex}
               src={safeImages[currentIndex]}
               alt={imageAlts[safeImages[currentIndex]] || `${title} - foto ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain select-none"
             />
           </div>
 
@@ -112,12 +120,14 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
             <>
               <button 
                 onClick={handlePrev}
+                aria-label="Predchádzajúca fotografia"
                 className="absolute left-2 lg:left-8 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-[#dc2626] text-white p-3 lg:p-4 rounded-[2px] backdrop-blur-sm transition-colors z-[110]"
               >
                 <ChevronLeft size={32} />
               </button>
               <button 
                 onClick={handleNext}
+                aria-label="Nasledujúca fotografia"
                 className="absolute right-2 lg:right-8 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-[#dc2626] text-white p-3 lg:p-4 rounded-[2px] backdrop-blur-sm transition-colors z-[110]"
               >
                 <ChevronRight size={32} />
