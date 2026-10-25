@@ -1,5 +1,5 @@
+import DeferredFacebookFeed from "./DeferredFacebookFeed";
 import Link from "next/link";
-import { getContent } from "@/actions/adminActions";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
@@ -21,9 +21,7 @@ const TikTokIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
 );
 
-export default async function Footer() {
-  const footerData = await getContent("global", "footer");
-
+export default function Footer({ data: footerData }) {
   const defaults = {
     firma: "BETONISSIMO.SK", 
     show_firma: true,
@@ -61,7 +59,7 @@ export default async function Footer() {
           {/* PREVÁDZKOVATEĽ */}
           {(d.show_firma || d.show_adresa || d.show_billing) && (
             <div className="space-y-6">
-              <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Prevádzkovateľ</h4>
+              <h2 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">{"// Prevádzkovateľ"}</h2>
               <div className="text-slate-400 text-xs leading-relaxed space-y-4">
                 {d.show_firma && <p className="text-white font-black text-sm uppercase tracking-tighter">{d.firma}</p>}
                 {d.show_adresa && (
@@ -84,7 +82,7 @@ export default async function Footer() {
           {/* KONTAKT */}
           {(d.show_email || d.show_tel) && (
             <div className="space-y-6">
-              <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Rýchly kontakt</h4>
+              <h2 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">{"// Rýchly kontakt"}</h2>
               <div className="space-y-6">
                 <div className="bg-neutral-900/50 p-4 border-l-2 border-[#dc2626] rounded-[2px]">
                   <p className="text-[9px] font-black uppercase tracking-widest text-[#dc2626] mb-1">Status</p>
@@ -109,7 +107,7 @@ export default async function Footer() {
           {/* SOCIÁLNE SIETE */}
           {(d.show_fb || d.show_ig || d.show_yt || d.show_tiktok) && (
             <div className="space-y-6">
-              <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Sledujte nás</h4>
+              <h2 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">{"// Sledujte nás"}</h2>
               <div className="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest">
                 {d.show_fb && (
                   <a href={d.fb_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white hover:text-white">
@@ -138,16 +136,9 @@ export default async function Footer() {
           {/* FB WIDGET */}
           {d.show_widget && d.fb_link && (
             <div className="space-y-6">
-              <h4 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">// Facebook Feed</h4>
+              <h2 className="text-[#dc2626] text-[10px] font-black uppercase tracking-[0.4em]">{"// Facebook Feed"}</h2>
               <div className="bg-neutral-900 border border-neutral-800 p-1 rounded-[2px] overflow-hidden ">
-                <iframe
-                  src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(d.fb_link)}&tabs=timeline&width=340&height=230&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false`}
-                  style={{ width: '100%', height: '230px' }}
-                  scrolling="no"
-                  frameBorder="0"
-                  allowFullScreen={true}
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                ></iframe>
+                <DeferredFacebookFeed pageUrl={d.fb_link} />
               </div>
             </div>
           )}

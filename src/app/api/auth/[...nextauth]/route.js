@@ -15,8 +15,9 @@ const handler = NextAuth({
         const adminPass = process.env.ADMIN_PASS;
 
         if (
-          credentials.username === adminUser && 
-          credentials.password === adminPass
+          adminUser && adminPass &&
+          credentials?.username === adminUser &&
+          credentials?.password === adminPass
         ) {
           return { id: "1", name: "Admin" };
         }

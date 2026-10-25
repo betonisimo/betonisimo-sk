@@ -1,10 +1,26 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 
+function subscribeToConsent(onChange) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener("cookie_consent_updated", onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener("cookie_consent_updated", onChange);
+  };
+}
+
+function getConsent() {
+  try { return window.localStorage.getItem("cookie_consent") || ""; }
+  catch { return ""; }
+}
+
+const getServerConsent = () => null;
+
 export default function CookieBanner() {
-  const [hasMounted, setHasMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const consent = useSyncExternalStore(subscribeToConsent, getConsent, getServerConsent);
+  const [dismissed, setDismissed] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   
   // Состояние для детальных настроек
@@ -13,21 +29,13 @@ export default function CookieBanner() {
     marketing: false,
   });
 
-  // Избегаем ошибок гидратации Next.js (проверяем localStorage только на клиенте)
-  useEffect(() => {
-    setHasMounted(true);
-    const savedConsent = localStorage.getItem("cookie_consent");
-    if (!savedConsent) {
-      setIsVisible(true);
-    }
-  }, []);
-
-  if (!hasMounted || !isVisible) return null;
+  if (consent === null || consent || dismissed) return null;
 
   // Функция сохранения выбора
   const saveConsent = (consentData) => {
-    localStorage.setItem("cookie_consent", JSON.stringify(consentData));
-    setIsVisible(false);
+    try { window.localStorage.setItem("cookie_consent", JSON.stringify(consentData)); }
+    catch { /* Keep the choice for this page if browser storage is unavailable. */ }
+    setDismissed(true);
     
     // Передаем событие в систему (понадобится для Google Consent Mode на следующем шаге)
     window.dispatchEvent(new Event("cookie_consent_updated"));
@@ -55,7 +63,7 @@ export default function CookieBanner() {
         {/* Главный блок с текстом */}
         <div className="flex flex-col gap-2">
           <h5 className="text-sm font-black uppercase tracking-widest text-[#dc2626]">
-            // Nastavenie súborov cookies
+            {"// Nastavenie súborov cookies"}
           </h5>
           <p className="text-xs text-slate-400 leading-relaxed max-w-4xl">
             Naša stránka používa cookies na zabezpečenie správneho fungovania, analýzu návštevnosti a personalizáciu reklám.

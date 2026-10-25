@@ -57,7 +57,8 @@ export default async function Hero() {
           src={d.bg_image} 
           alt={d.bg_image_alt || "Betónové ploty"}
           fill
-          priority
+          preload
+          sizes="100vw"
           className="object-cover scale-105 animate-slow-zoom"
         />
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff10_1px,transparent_1px)] [background-size:40px_40px] z-[1]"></div>

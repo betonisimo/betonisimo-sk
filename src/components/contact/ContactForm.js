@@ -1,8 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { sendContactEmail } from "@/actions/emailActions";
 import Link from "next/link"; 
-export default function ContactForm({ options = {} }) {
+export default function ContactForm({ options = {}, headingLevel = 2 }) {
+  const SpecificationHeading = headingLevel === 3 ? "h3" : "h2";
+  const formId = useId();
+  const fieldId = (name) => `${formId}-${name}`;
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
 
@@ -36,16 +39,20 @@ export default function ContactForm({ options = {} }) {
     setLoading(true);
     setStatus(null);
 
-    const formData = new FormData(event.target);
-    const result = await sendContactEmail(formData);
-
-    setLoading(false);
-    if (result.success) {
-      setStatus('success');
-      event.target.reset();
-      setCustomFields({ vyska: false, prevedenie: false, beton: false, farba: false });
-    } else {
+    const form = event.currentTarget;
+    try {
+      const result = await sendContactEmail(new FormData(form));
+      if (result?.success) {
+        setStatus('success');
+        form.reset();
+        setCustomFields({ vyska: false, prevedenie: false, beton: false, farba: false });
+      } else {
+        setStatus('error');
+      }
+    } catch {
       setStatus('error');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -100,108 +107,109 @@ export default function ContactForm({ options = {} }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} aria-busy={loading} className="space-y-8">
+      {status === 'error' && <p role="alert" className="text-sm font-bold text-red-700">Dopyt sa nepodarilo odoslať. Skúste to znova alebo nás kontaktujte telefonicky.</p>}
       <div className="space-y-5">
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Meno a priezvisko</label>
-          <input name="name" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
+          <label htmlFor={fieldId("name")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Meno a priezvisko</label>
+          <input id={fieldId("name")} name="name" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">E-mail</label>
-            <input name="email" type="email" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
+            <label htmlFor={fieldId("email")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">E-mail</label>
+            <input id={fieldId("email")} name="email" type="email" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telefón</label>
-            <input name="phone" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
+            <label htmlFor={fieldId("phone")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Telefón</label>
+            <input id={fieldId("phone")} name="phone" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-bold" />
           </div>
         </div>
       </div>
 
       <div className="space-y-5 border-t border-slate-100 pt-6">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#dc2626] mb-2">// Špecifikácia oplotenia</h4>
+        <SpecificationHeading className="text-[10px] font-black uppercase tracking-[0.3em] text-[#dc2626] mb-2">{"// Špecifikácia oplotenia"}</SpecificationHeading>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dĺžka oplotenia (bežné metre)</label>
-            <input name="dlzka" type="text" placeholder="napr. 25m" className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+            <label htmlFor={fieldId("dlzka")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dĺžka oplotenia (bežné metre)</label>
+            <input id={fieldId("dlzka")} name="dlzka" type="text" placeholder="napr. 25m" className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Výška oplotenia</label>
+            <label htmlFor={fieldId("vyska")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Výška oplotenia</label>
             {!customFields.vyska ? (
-              <select name="vyska" defaultValue="" onChange={(e) => handleSelectChange(e, 'vyska')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
+              <select id={fieldId("vyska")} name="vyska" defaultValue="" onChange={(e) => handleSelectChange(e, 'vyska')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
                 <option value="" disabled>Vyberte možnosť...</option>
                 {optVyska.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                 <option value="custom" className="font-bold text-[#dc2626]">Iné (napíšem vlastné)...</option>
               </select>
             ) : (
               <div className="flex gap-2 items-center">
-                <input name="vyska" autoFocus placeholder="Zadajte vlastnú výšku..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+                <input id={fieldId("vyska")} name="vyska" autoFocus placeholder="Zadajte vlastnú výšku..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
                 <button type="button" onClick={() => cancelCustom('vyska')} className="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase tracking-widest px-2">Zrušiť</button>
               </div>
             )}
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Prevedenie</label>
+            <label htmlFor={fieldId("prevedenie")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Prevedenie</label>
             {!customFields.prevedenie ? (
-              <select name="prevedenie" defaultValue="" onChange={(e) => handleSelectChange(e, 'prevedenie')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
+              <select id={fieldId("prevedenie")} name="prevedenie" defaultValue="" onChange={(e) => handleSelectChange(e, 'prevedenie')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
                 <option value="" disabled>Vyberte možnosť...</option>
                 {optPrevedenie.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                 <option value="custom" className="font-bold text-[#dc2626]">Iné (napíšem vlastné)...</option>
               </select>
             ) : (
               <div className="flex gap-2 items-center">
-                <input name="prevedenie" autoFocus placeholder="Zadajte prevedenie..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+                <input id={fieldId("prevedenie")} name="prevedenie" autoFocus placeholder="Zadajte prevedenie..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
                 <button type="button" onClick={() => cancelCustom('prevedenie')} className="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase tracking-widest px-2">Zrušiť</button>
               </div>
             )}
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Druh betónu</label>
+            <label htmlFor={fieldId("druhBetonu")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Druh betónu</label>
             {!customFields.beton ? (
-              <select name="druhBetonu" defaultValue="" onChange={(e) => handleSelectChange(e, 'beton')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
+              <select id={fieldId("druhBetonu")} name="druhBetonu" defaultValue="" onChange={(e) => handleSelectChange(e, 'beton')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
                 <option value="" disabled>Vyberte možnosť...</option>
                 {optBeton.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                 <option value="custom" className="font-bold text-[#dc2626]">Iné (napíšem vlastné)...</option>
               </select>
             ) : (
               <div className="flex gap-2 items-center">
-                <input name="druhBetonu" autoFocus placeholder="Zadajte druh betónu..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+                <input id={fieldId("druhBetonu")} name="druhBetonu" autoFocus placeholder="Zadajte druh betónu..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
                 <button type="button" onClick={() => cancelCustom('beton')} className="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase tracking-widest px-2">Zrušiť</button>
               </div>
             )}
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Farebné prevedenie</label>
+            <label htmlFor={fieldId("farba")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Farebné prevedenie</label>
             {!customFields.farba ? (
-              <select name="farba" defaultValue="" onChange={(e) => handleSelectChange(e, 'farba')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
+              <select id={fieldId("farba")} name="farba" defaultValue="" onChange={(e) => handleSelectChange(e, 'farba')} className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium cursor-pointer">
                 <option value="" disabled>Vyberte možnosť...</option>
                 {optFarba.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                 <option value="custom" className="font-bold text-[#dc2626]">Iné (napíšem vlastné)...</option>
               </select>
             ) : (
               <div className="flex gap-2 items-center">
-                <input name="farba" autoFocus placeholder="Zadajte farbu..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+                <input id={fieldId("farba")} name="farba" autoFocus placeholder="Zadajte farbu..." required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
                 <button type="button" onClick={() => cancelCustom('farba')} className="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase tracking-widest px-2">Zrušiť</button>
               </div>
             )}
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Miesto montáže (Mesto / Obec)</label>
-            <input name="miesto" type="text" placeholder="napr. Bratislava" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
+            <label htmlFor={fieldId("miesto")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Miesto montáže (Mesto / Obec)</label>
+            <input id={fieldId("miesto")} name="miesto" type="text" placeholder="napr. Bratislava" required className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent text-slate-900 font-medium" />
           </div>
         </div>
       </div>
 
       <div className="space-y-1 border-t border-slate-100 pt-6">
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Špeciálne požiadavky / Vaša správa</label>
-        <textarea name="message" rows={3} placeholder="Máte ďalšie otázky?" className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent resize-none text-slate-900 font-medium" />
+        <label htmlFor={fieldId("message")} className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Špeciálne požiadavky / Vaša správa</label>
+        <textarea id={fieldId("message")} name="message" rows={3} placeholder="Máte ďalšie otázky?" className="w-full border-b border-slate-200 py-3 px-1 outline-none focus:border-[#dc2626] transition-colors bg-transparent resize-none text-slate-900 font-medium" />
       </div>
 
       {/* Текст согласия с обработкой данных и ссылкой на GDPR */}

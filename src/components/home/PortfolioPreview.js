@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ArrowUpRight } from "lucide-react";
 
@@ -51,7 +52,7 @@ export default function PortfolioPreview({ projects }) {
 
               {/* ИЗОБРАЖЕНИЕ */}
               <div className="relative aspect-[4/5] bg-neutral-900 overflow-hidden rounded-[2px]">
-                <img
+                <Image fill sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 440px"
                   src={project.mainImage}
                   // СУПЕР SEO-ХАК ДЛЯ ЛОКАЛЬНЫХ КЛИЕНТОВ:
                   alt={project.seo?.imageAlts?.[project.mainImage] || `Betónový plot ${project.location ? 'montáž ' + project.location : ''} - ${project.title}`}

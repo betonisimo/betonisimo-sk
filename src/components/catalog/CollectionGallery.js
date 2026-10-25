@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom"; // ИМПОРТИРУЕМ ПОРТАЛ
@@ -10,7 +11,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-  const safeImages = images && images.length > 0 ? images : ["/uploads/default.webp"];
+  const safeImages = images && images.length > 0 ? images : ["/og-image.jpg"];
 
   // Блокируем скролл страницы, когда открыт полноэкранный режим
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
         role="button"
         tabIndex={0}
         aria-label="Zväčšiť fotografiu"
-        className="relative flex-1 bg-slate-200 rounded-[2px] overflow-hidden shadow-2xl cursor-pointer group/main"
+        className="relative flex-1 min-h-0 bg-slate-200 rounded-[2px] overflow-hidden shadow-2xl cursor-pointer group/main"
         onClick={() => setIsLightboxOpen(true)}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -53,7 +54,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
         <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#dc2626] z-10 opacity-50"></div>
         <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#dc2626] z-10 opacity-50"></div>
         
-        <img
+        <Image fill sizes="(max-width: 1023px) 100vw, 60vw" loading="eager" fetchPriority="high"
           src={safeImages[currentIndex]}
           alt={imageAlts[safeImages[currentIndex]] || `${title} - foto ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-all duration-500 ease-in-out"
@@ -80,7 +81,7 @@ export default function CollectionGallery({ images, title, imageAlts = {} }) {
                 : "opacity-60  hover:opacity-100 hover:-0"
             }`}
           >
-            <img src={img} alt={imageAlts[img] || `${title} - foto ${idx + 1}`} className="w-full h-full object-cover" />
+            <Image fill sizes="128px" src={img} alt={imageAlts[img] || `${title} - foto ${idx + 1}`} className="w-full h-full object-cover" />
             {currentIndex === idx && (
               <div className="absolute inset-0 bg-[#dc2626]/20"></div>
             )}

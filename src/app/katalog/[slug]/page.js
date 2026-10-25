@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getCollectionBySlug } from "@/lib/public-data";
 import { notFound } from "next/navigation";
 import { getContent } from "@/actions/adminActions";
 import Link from "next/link";
@@ -10,9 +10,7 @@ import { collectionSpecificationsSection, resolveCollectionSpecifications } from
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const collection = await prisma.collection.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  const collection = await getCollectionBySlug(resolvedParams.slug);
 
   if (!collection) return { title: "Katalóg nenájdený | Beton-SK" };
 
@@ -45,9 +43,7 @@ export default async function CollectionPage({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
 
-  const collection = await prisma.collection.findUnique({
-    where: { slug: slug },
-  });
+  const collection = await getCollectionBySlug(slug);
 
   if (!collection) notFound();
   const [seo, benefitsData, storedSpecifications] = await Promise.all([
@@ -60,7 +56,7 @@ export default async function CollectionPage({ params }) {
   // Собираем картинки
   const allImages = collection.gallery?.length > 0
     ? collection.gallery
-    : [collection.mainImage || "/uploads/default.webp"];
+    : [collection.mainImage || "/og-image.jpg"];
 
   return (
       <div className="bg-[#f8fafc] min-h-screen lg:h-screen pt-24 pb-8 selection:bg-red-100 font-sans lg:overflow-hidden flex flex-col">
@@ -114,10 +110,10 @@ export default async function CollectionPage({ params }) {
                     <ShieldCheck size={100} strokeWidth={1} />
                   </div>
 
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6 flex items-center gap-3">
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6 flex items-center gap-3">
                     <Zap size={14} className="shrink-0 text-[#dc2626] fill-[#dc2626]" />
                     <span className="min-w-0 break-words">{specifications.title}</span>
-                  </h3>
+                  </h2>
 
                   <div className="grid grid-cols-2 gap-y-6 gap-x-6 relative z-10">
                     {specifications.items.map((item, index) => (
