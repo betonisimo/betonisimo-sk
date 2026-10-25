@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
 import AdminScripts from "@/components/admin/AdminScripts";
 import { SITE_URL } from "@/lib/site-url";
+import { organizationJsonLd, serializeJsonLd } from "@/lib/structured-data";
 const inter = Inter({
   subsets: ["latin-ext"],
   display: 'swap',
@@ -53,16 +54,6 @@ export const metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "BETONISSIMO.SK",
-  "image": `${baseUrl}/logo.png`,
-  "@id": baseUrl,
-  "url": baseUrl,
-  "telephone": "+421911640097"
-};
-
 export default async function RootLayout({ children }) {
   const [scriptSettings, footerSettings] = await Promise.all([
     prisma.globalSettings.findUnique({
@@ -78,6 +69,7 @@ export default async function RootLayout({ children }) {
     ? footerData.tel
     : "0911 640 097";
   const showNavigationPhone = footerData?.show_tel !== false;
+  const jsonLd = organizationJsonLd({ phone: navigationPhone, showPhone: showNavigationPhone });
 
   return (
     <html lang="sk" className={inter.variable} suppressHydrationWarning>
@@ -98,7 +90,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {/* 1. Схема для Google (JSON-LD) */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
 
       
@@ -116,7 +108,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <AdminScripts code={scriptSettings?.value} />
           <Navbar phone={navigationPhone} showPhone={showNavigationPhone} />
           <main>{children}</main>
-          <Footer />
+          <Footer data={footerData} />
         </body>
     </html>
   );

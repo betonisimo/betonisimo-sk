@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { uploadImage } from "@/actions/uploadActions"; // Импортируем наш новый экшен
 import { Upload, X, ImageIcon } from "lucide-react";
@@ -36,7 +37,7 @@ export default function ImagePicker({ defaultValue, defaultAlt = "", name = "mai
       <div className="relative aspect-video bg-slate-100 overflow-hidden flex items-center justify-center">
         {image ? (
           <>
-            <img src={image} className="w-full h-full object-cover" alt="Preview" />
+            <Image fill unoptimized sizes="100vw" src={image} className="w-full h-full object-cover" alt="Preview" />
             <button 
               type="button"
               onClick={() => { setImage(""); setAlt(""); }}

@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { getContent } from "@/actions/adminActions";
 import CollectionGallery from "@/components/catalog/CollectionGallery";
-import { prisma } from "@/lib/prisma";
-import { SITE_URL } from "@/lib/site-url";
+import { getAccessoryBySlug } from "@/lib/public-data";
+import { accessoryProductJsonLd, serializeJsonLd } from "@/lib/structured-data";
 import { getSeo, imageAlt } from "@/lib/seo";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const accessory = await prisma.accessory.findUnique({ where: { slug } });
+  const accessory = await getAccessoryBySlug(slug);
 
   if (!accessory) return { title: "Doplnok nebol nájdený | BETONISSIMO.SK" };
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }) {
 
 export default async function AccessoryPage({ params }) {
   const { slug } = await params;
-  const accessory = await prisma.accessory.findUnique({ where: { slug } });
+  const accessory = await getAccessoryBySlug(slug);
 
   if (!accessory) notFound();
   const seo = await getSeo("accessory", accessory.id);
@@ -60,31 +60,11 @@ export default async function AccessoryPage({ params }) {
     currency: "EUR",
   }).format(Number(price));
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: accessory.title,
-    image: accessory.mainImage || `${SITE_URL}/og-image.jpg`,
-    description: accessory.description,
-    brand: {
-      "@type": "Brand",
-      name: "BETONISSIMO.SK",
-    },
-    offers: {
-      "@type": "Offer",
-      price,
-      priceCurrency: "EUR",
-      availability: "https://schema.org/InStock",
-      seller: {
-        "@type": "Organization",
-        name: "BETONISSIMO.SK",
-      },
-    },
-  };
+  const jsonLd = accessoryProductJsonLd(accessory);
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />}
 
       <div className="flex min-h-screen flex-col bg-[#f8fafc] pb-8 pt-24 font-sans selection:bg-red-100 lg:h-screen lg:overflow-hidden">
         <div className="mx-auto flex h-full w-full max-w-[1600px] flex-1 flex-col px-6 lg:px-8">

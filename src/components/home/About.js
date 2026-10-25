@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import { usePropDraft } from "@/hooks/usePropDraft";
 import { saveContent } from "@/actions/adminActions";
 import { uploadImage } from "@/actions/uploadActions";
 
@@ -14,13 +15,10 @@ const defaultData = {
 };
 
 export default function About({ editMode = false, dbData = defaultData }) {
-  const [content, setContent] = useState({ ...defaultData, ...dbData });
+  const [draft, setContent] = usePropDraft(dbData);
+  const content = { ...defaultData, ...draft };
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    if (dbData) setContent({ ...defaultData, ...dbData });
-  }, [dbData]);
 
   const handleBlur = async (field, event) => {
     const newText = event.target.innerText.trim();
@@ -99,7 +97,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
             
             <div className="space-y-8 text-sm md:text-base font-medium text-slate-500 uppercase tracking-tight max-w-2xl leading-relaxed pl-1 md:pl-3">
               <p {...getEditableProps("odstavec1")} className="break-words">
-                // {content.odstavec1}
+                {"// "}{content.odstavec1}
               </p>
               
               <div className="flex gap-4 items-start">
@@ -110,7 +108,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
               </div>
               
               <p {...getEditableProps("odstavec3")} className="break-words">
-                // {content.odstavec3}
+                {"// "}{content.odstavec3}
               </p>
             </div>
           </div>
@@ -140,6 +138,7 @@ export default function About({ editMode = false, dbData = defaultData }) {
               src={content.obrazok || defaultData.obrazok}
               alt={content.obrazokAlt || "Výroba a montáž betónových plotov"}
               fill
+              sizes="(max-width: 1023px) 100vw, 560px"
               className={`object-cover filter  scale-100 transition-all duration-[800ms] ease-in-out group-hover:!-0 group-hover:scale-110 ${isUploading ? 'opacity-30 blur-md' : ''}`}
             />
             

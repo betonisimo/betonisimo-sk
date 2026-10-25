@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Prisma owns these files; regenerating them must not create lint failures.
+    "src/generated/prisma/**",
   ]),
 ]);
 

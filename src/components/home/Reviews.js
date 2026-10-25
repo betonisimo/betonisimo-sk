@@ -2,35 +2,49 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { saveContent } from "@/actions/adminActions";
 import { submitReview } from "@/actions/reviewActions";
+import { usePropDraft } from "@/hooks/usePropDraft";
 import {
   Quote, ChevronLeft, ChevronRight, X, Star
 } from "lucide-react";
 
 // 1. Убрали Martin K. из дефолтных значений
-const defaultReviews = [];
-
 export default function Reviews({ editMode = false, dbData, approvedReviews = [] }) {
   // Оставляем только заголовок как статический контент
-  const [title, setTitle] = useState(dbData?.title || "Recenzie našich klientov");
+  const [title, setTitle] = usePropDraft(dbData?.title || "Recenzie našich klientov");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedReview, setExpandedReview] = useState(null);
   const scrollRef = useRef(null);
+  const modalRef = useRef(null);
 
   // Блокировка скролла при открытых модалках
   useEffect(() => {
-    if (expandedReview || isFormOpen) {
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    }
+    if (!expandedReview && !isFormOpen) return;
+    const previousFocus = document.activeElement;
+    const focusableElements = () => Array.from(modalRef.current?.querySelectorAll('button, input, select, textarea, a[href], [tabindex="0"]') || [])
+      .filter((element) => !element.disabled && element.getClientRects().length);
+    focusableElements()[0]?.focus();
+    const bodyOverflow = document.body.style.overflow;
+    const rootOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') { setExpandedReview(null); setIsFormOpen(false); }
+      if (event.key === 'Tab') {
+        const elements = focusableElements();
+        const first = elements[0], last = elements.at(-1);
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = rootOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
   }, [expandedReview, isFormOpen]);
-
-  useEffect(() => {
-    if (dbData?.title) setTitle(dbData.title);
-  }, [dbData]);
 
   // 2. ФИКС: Теперь отображаем ТОЛЬКО отзывы из базы модерации (approvedReviews)
   const displayReviews = useMemo(() => {
@@ -86,11 +100,11 @@ export default function Reviews({ editMode = false, dbData, approvedReviews = []
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8 border-l-4 border-[#dc2626] pl-6 md:pl-8">
           <div className="max-w-2xl">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-[#dc2626] mb-4 font-black">// Customer_Voice</p>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#dc2626] mb-4 font-black">{"// Customer_Voice"}</p>
             <h2
               contentEditable={editMode}
               suppressContentEditableWarning
-              onBlur={(e) => { const nt = e.target.innerText; setTitle(nt); saveTitle(nt); }}
+              onBlur={editMode ? (e) => { const nt = e.target.innerText; setTitle(nt); saveTitle(nt); } : undefined}
               className="text-4xl md:text-8xl font-black tracking-tighter uppercase outline-none break-words leading-[0.85] text-slate-900"
             >
               {title}
@@ -107,8 +121,8 @@ export default function Reviews({ editMode = false, dbData, approvedReviews = []
               </button>
             )}
             <div className="flex gap-2">
-              <button onClick={() => scroll('left')} className="p-4 bg-white text-black hover:bg-black hover:text-white transition-colors duration-300 rounded-[2px] shadow-md"><ChevronLeft size={20} /></button>
-              <button onClick={() => scroll('right')} className="p-4 bg-white text-black hover:bg-black hover:text-white transition-colors duration-300 rounded-[2px] shadow-md"><ChevronRight size={20} /></button>
+              <button aria-label="Predchádzajúce recenzie" onClick={() => scroll('left')} className="p-4 bg-white text-black hover:bg-black hover:text-white transition-colors duration-300 rounded-[2px] shadow-md"><ChevronLeft size={20} /></button>
+              <button aria-label="Nasledujúce recenzie" onClick={() => scroll('right')} className="p-4 bg-white text-black hover:bg-black hover:text-white transition-colors duration-300 rounded-[2px] shadow-md"><ChevronRight size={20} /></button>
             </div>
           </div>
         </div>
@@ -133,7 +147,7 @@ export default function Reviews({ editMode = false, dbData, approvedReviews = []
                         </div>
                       </div>
                       <p className="text-xl md:text-2xl font-medium text-slate-700 leading-relaxed italic">
-                        "{isLong ? rev.text.substring(0, 160) + "..." : rev.text}"
+                        &quot;{isLong ? rev.text.substring(0, 160) + "..." : rev.text}&quot;
                       </p>
                       {isLong && (
                         <button
@@ -161,17 +175,17 @@ export default function Reviews({ editMode = false, dbData, approvedReviews = []
       {expandedReview && (
         <div className="fixed inset-0 z-[4000] flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => setExpandedReview(null)} onWheel={preventScroll} onTouchMove={preventScroll}></div>
-          <div className="relative z-10 w-full max-w-3xl bg-white rounded-[2px] shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] border-t-4 border-[#dc2626] overflow-hidden" onWheel={stopScrollPropagation} onTouchMove={stopScrollPropagation}>
+          <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Detail recenzie" className="relative z-10 w-full max-w-3xl bg-white rounded-[2px] shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] border-t-4 border-[#dc2626] overflow-hidden" onWheel={stopScrollPropagation} onTouchMove={stopScrollPropagation}>
             <div className="flex justify-between items-center p-6 md:px-10 border-b border-slate-100 shrink-0 bg-white">
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Detail recenzie</div>
-              <button onClick={() => setExpandedReview(null)} className="text-slate-300 hover:text-[#dc2626] transition-colors duration-300"><X size={28} /></button>
+              <button aria-label="Zavrieť recenziu" onClick={() => setExpandedReview(null)} className="text-slate-300 hover:text-[#dc2626] transition-colors duration-300"><X size={28} /></button>
             </div>
             <div className="p-6 md:p-10 overflow-y-auto overscroll-contain no-scrollbar bg-slate-50 flex-1">
               <div className="space-y-8">
                 <div className="flex gap-1 text-amber-400">
                   {[...Array(5)].map((_, i) => (<Star key={i} size={20} fill={i < (expandedReview.rating || 5) ? "currentColor" : "none"} />))}
                 </div>
-                <p className="text-xl md:text-3xl font-medium text-slate-800 leading-relaxed italic break-words">"{expandedReview.text}"</p>
+                <p className="text-xl md:text-3xl font-medium text-slate-800 leading-relaxed italic break-words">&quot;{expandedReview.text}&quot;</p>
               </div>
             </div>
             <div className="p-6 md:px-10 bg-white border-t border-slate-100 shrink-0">
@@ -185,31 +199,31 @@ export default function Reviews({ editMode = false, dbData, approvedReviews = []
       {isFormOpen && (
         <div className="fixed inset-0 z-[4000] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-md transition-opacity" onClick={() => setIsFormOpen(false)} onWheel={preventScroll} onTouchMove={preventScroll}></div>
-          <form onSubmit={handleClientSubmit} onClick={(e) => e.stopPropagation()} onWheel={stopScrollPropagation} onTouchMove={stopScrollPropagation} className="relative z-10 w-full max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white flex flex-col shadow-2xl border-t-4 border-[#dc2626] overflow-hidden rounded-t-[2px] sm:rounded-[2px]">
+          <form ref={modalRef} role="dialog" aria-modal="true" aria-label="Napísať recenziu" onSubmit={handleClientSubmit} onClick={(e) => e.stopPropagation()} onWheel={stopScrollPropagation} onTouchMove={stopScrollPropagation} className="relative z-10 w-full max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white flex flex-col shadow-2xl border-t-4 border-[#dc2626] overflow-hidden rounded-t-[2px] sm:rounded-[2px]">
             <div className="p-6 md:p-10 border-b border-slate-100 flex justify-between items-start bg-white shrink-0">
               <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-[0.85]">Napísať <br /><span className="text-[#dc2626]">Recenziu</span></h3>
-              <button type="button" onClick={() => setIsFormOpen(false)} className="text-slate-300 hover:text-[#dc2626] transition-colors p-2 -mt-2 -mr-2"><X size={32} /></button>
+              <button aria-label="Zavrieť formulár recenzie" type="button" onClick={() => setIsFormOpen(false)} className="text-slate-300 hover:text-[#dc2626] transition-colors p-2 -mt-2 -mr-2"><X size={32} /></button>
             </div>
             <div className="flex-1 overflow-y-auto overscroll-contain p-6 md:p-10 space-y-8 no-scrollbar bg-slate-50">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Vaše meno</label>
-                  <input name="author" required placeholder="MENO" className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium uppercase transition-all rounded-[2px]" />
+                  <label htmlFor="review-author" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Vaše meno</label>
+                  <input id="review-author" name="author" maxLength={100} required placeholder="MENO" className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium uppercase transition-all rounded-[2px]" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Hodnotenie</label>
-                  <select name="rating" required className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-black uppercase rounded-[2px] appearance-none">
+                  <label htmlFor="review-rating" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Hodnotenie</label>
+                  <select id="review-rating" name="rating" required className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-black uppercase rounded-[2px] appearance-none">
                     <option value="5">⭐⭐⭐⭐⭐ 5/5</option><option value="4">⭐⭐⭐⭐ 4/5</option><option value="3">⭐⭐⭐ 3/5</option><option value="2">⭐⭐ 2/5</option><option value="1">⭐ 1/5</option>
                   </select>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Lokalita (Mesto)</label>
-                <input name="mesto" placeholder="NAPR. BRATISLAVA" className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium uppercase transition-all rounded-[2px]" />
+                <label htmlFor="review-city" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Lokalita (Mesto)</label>
+                <input id="review-city" name="mesto" placeholder="NAPR. BRATISLAVA" className="w-full bg-white border border-slate-200 px-4 py-3 outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium uppercase transition-all rounded-[2px]" />
               </div>
               <div className="flex flex-col gap-2 pb-6">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Vaša skúsenosť</label>
-                <textarea name="text" required placeholder="NAPÍŠTE NÁM VAŠU SKÚSENOSŤ..." className="w-full bg-white border border-slate-200 p-4 min-h-[140px] outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium resize-none rounded-[2px]"></textarea>
+                <label htmlFor="review-text" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Vaša skúsenosť</label>
+                <textarea id="review-text" name="text" maxLength={5000} required placeholder="NAPÍŠTE NÁM VAŠU SKÚSENOSŤ..." className="w-full bg-white border border-slate-200 p-4 min-h-[140px] outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] text-slate-900 font-medium resize-none rounded-[2px]"></textarea>
               </div>
             </div>
             <div className="p-4 md:p-8 bg-white border-t border-slate-100 flex gap-4 shrink-0">

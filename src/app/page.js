@@ -20,25 +20,19 @@ export async function generateMetadata() {
 }
 
 export default async function Home() {
-  const recentProjects = await prisma.project.findMany({ 
-    take: 6, 
-    orderBy: { createdAt: 'desc' } 
-  });
+  const [recentProjects, collections, aboutData, servicesData, reviewsData, approvedReviews] = await Promise.all([
+    prisma.project.findMany({ take: 6, orderBy: { createdAt: 'desc' } }),
+    getCollections(),
+    getContent("domov", "domov-o-nas"),
+    getContent("domov", "domov-sluzby"),
+    getContent("domov", "domov-recenzie"),
+    prisma.review.findMany({ where: { status: 'APPROVED' }, orderBy: { createdAt: 'desc' } }),
+  ]);
   const projectSeo = await getSeoMany("project", recentProjects.map((project) => project.id));
   const projectsWithSeo = recentProjects.map((project) => ({ ...project, seo: projectSeo.get(seoSection("project", project.id)) || {} }));
-  const collections = await getCollections();
-  const aboutData = await getContent("domov", "domov-o-nas");
-  const servicesData = await getContent("domov", "domov-sluzby");
-  const reviewsData = await getContent("domov", "domov-recenzie");
-  
-  // Получаем одобренные отзывы
-  const approvedReviews = await prisma.review.findMany({
-    where: { status: 'APPROVED' },
-    orderBy: { createdAt: 'desc' }
-  });
 
   return (
-    <main>
+    <>
       <Hero />
       <StyleGrid collections={collections} limit={8}/>
       <PortfolioPreview projects={projectsWithSeo} />
@@ -49,6 +43,6 @@ export default async function Home() {
         dbData={reviewsData || undefined}
         approvedReviews={approvedReviews} 
       />
-    </main>
+    </>
   );
 }

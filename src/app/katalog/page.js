@@ -19,7 +19,7 @@ export default async function KatalogPage() {
   return (
     <div> 
       {/* Передаем все коллекции без лимита */}
-      <StyleGrid collections={collections} />
+      <StyleGrid collections={collections} headingLevel={1} />
     </div>
   );
 }

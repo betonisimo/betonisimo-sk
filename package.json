@@ -21,10 +21,10 @@
     "framer-motion": "^12.38.0",
     "googleapis": "^171.4.0",
     "lucide-react": "^1.8.0",
-    "next": "16.2.4",
-    "next-auth": "^4.24.14",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "next": "16.4.3",
+    "next-auth": "^4.24.15",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
     "resend": "^6.12.2",
     "yet-another-react-lightbox": "^3.31.0"
   },
@@ -33,7 +33,7 @@
     "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "16.4.3",
     "prisma": "^6.19.3",
     "tailwindcss": "^4"
   }

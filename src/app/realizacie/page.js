@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
@@ -35,9 +36,9 @@ export default async function PortfolioPage() {
           </div>
           <div className="text-right hidden md:block">
             <p className="text-[10px] font-mono text-slate-400 uppercase leading-relaxed tracking-widest">
-              // Total_Projects: {projects.length} <br />
-              // Status: Operational <br />
-              // Quality_Check: Passed
+              {"// Total_Projects: "}{projects.length} <br />
+              {"// Status: Operational"} <br />
+              {"// Quality_Check: Passed"}
             </p>
           </div>
         </div>
@@ -54,7 +55,7 @@ export default async function PortfolioPage() {
               {/* IMAGE CONTAINER */}
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 rounded-t-[2px]">
                 {project.mainImage ? (
-                  <img
+                  <Image fill sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 440px"
                     src={project.mainImage}
                     alt={seo.get(seoSection("project", project.id))?.imageAlts?.[project.mainImage] || project.title}
                     loading="lazy"
@@ -82,9 +83,9 @@ export default async function PortfolioPage() {
                   </span>
                 </div>
 
-                <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-8 group-hover:text-[#dc2626] transition-colors duration-[800ms]">
+                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-8 group-hover:text-[#dc2626] transition-colors duration-[800ms]">
                   {project.title}
-                </h4>
+                </h2>
 
                 <div className="mt-auto pt-6 border-t border-slate-100 flex items-center justify-between">
                   {project.location && (

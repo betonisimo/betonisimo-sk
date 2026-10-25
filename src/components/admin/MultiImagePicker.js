@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef } from "react";
 import { Camera, Loader2, X, Plus } from "lucide-react";
 import { uploadImage } from "@/actions/uploadActions";
@@ -56,7 +57,7 @@ export default function MultiImagePicker({ defaultValue = [], defaultAlts = {} }
         {images.map((url, index) => (
           <div key={index} className="rounded-xl overflow-hidden bg-slate-100 group border border-slate-200">
             <div className="relative aspect-square">
-            <img src={url} className="w-full h-full object-cover" alt={alts[url] || `Fotografia projektu ${index + 1}`} />
+            <Image fill unoptimized sizes="100vw" src={url} className="w-full h-full object-cover" alt={alts[url] || `Fotografia projektu ${index + 1}`} />
             <button
               type="button"
               onClick={() => removeImage(index)}

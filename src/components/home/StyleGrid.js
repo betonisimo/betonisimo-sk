@@ -1,9 +1,10 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { Check, ArrowUpRight, Grid3X3 } from "lucide-react";
 
 // ДОБАВИЛИ ПРОПС limit
-export default function StyleGrid({ collections, limit }) {
+export default function StyleGrid({ collections, limit, headingLevel = 2 }) {
   if (!collections || collections.length === 0) return null;
 
   // Если передан лимит (например, 8), обрезаем массив. Если нет — показываем все.
@@ -11,6 +12,8 @@ export default function StyleGrid({ collections, limit }) {
   
   // Проверяем, есть ли еще коллекции, чтобы показать кнопку
   const hasMore = limit && collections.length > limit;
+  const Heading = headingLevel === 1 ? "h1" : "h2";
+  const CardHeading = headingLevel === 1 ? "h2" : "h3";
 
   return (
     <section className="py-24 lg:py-40 bg-[#f8fafc] border-b border-slate-200 font-sans" id="kolekcie">
@@ -24,10 +27,10 @@ export default function StyleGrid({ collections, limit }) {
                 Katalóg línií
               </span>
             </div>
-            <h2 className="text-5xl md:text-8xl font-black text-slate-900 uppercase tracking-tighter leading-[0.85]">
+            <Heading className="text-5xl md:text-8xl font-black text-slate-900 uppercase tracking-tighter leading-[0.85]">
               Vyberte si <br />
               svoju <span className="text-[#dc2626]">kolekciu</span>
-            </h2>
+            </Heading>
           </div>
           <p className="text-slate-500 text-sm font-medium uppercase tracking-tight max-w-sm leading-relaxed">
             {"// Každý štýl definuje charakter vášho domova."} <br />
@@ -37,17 +40,18 @@ export default function StyleGrid({ collections, limit }) {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {displayCollections.map((col) => (
+          {displayCollections.map((col, index) => (
             <Link
               href={`/katalog/${col.slug}`}
               key={col.id}
               className="group relative flex min-h-[26rem] flex-col justify-end bg-slate-900 border border-slate-200/50 rounded-[2px] overflow-hidden transition-shadow duration-500 hover:shadow-2xl"
             >
               {/* BACKGROUND IMAGE */}
-              <img
-                src={col.mainImage || '/uploads/default.webp'}
+              <Image fill sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 320px"
+                src={col.mainImage || '/og-image.jpg'}
                 alt={col.seo?.imageAlts?.[col.mainImage] || `Betónový plot - katalog ${col.title}`}
-                loading="lazy"
+                loading={headingLevel === 1 && index === 0 ? "eager" : "lazy"}
+                fetchPriority={headingLevel === 1 && index === 0 ? "high" : undefined}
                 className="absolute inset-0 w-full h-full object-cover filter  transition-all duration-700 ease-in-out group-hover:-0 group-hover:scale-110 z-0"
               />
 
@@ -56,9 +60,9 @@ export default function StyleGrid({ collections, limit }) {
 
               {/* CONTENT AREA */}
               <div className="relative z-20 flex min-w-0 flex-col p-6 md:p-7">
-                <h3 className="break-words text-2xl font-black text-white uppercase tracking-tighter leading-[1.05] transition-transform duration-500 group-hover:-translate-y-1 sm:text-3xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
+                <CardHeading className="break-words text-2xl font-black text-white uppercase tracking-tighter leading-[1.05] transition-transform duration-500 group-hover:-translate-y-1 sm:text-3xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
                   {col.title}
-                </h3>
+                </CardHeading>
                 <p className="mt-3 mb-5 break-words text-[9px] font-black uppercase tracking-[0.16em] text-[#dc2626] drop-shadow-md">
                   {col.subtitle || "Standard Line"}
                 </p>

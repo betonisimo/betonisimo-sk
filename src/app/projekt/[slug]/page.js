@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getProjectBySlug } from "@/lib/public-data";
 import RichContent from "@/components/content/RichContent";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -10,9 +10,7 @@ import { getSeo, imageAlt } from "@/lib/seo";
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО ПРОЕКТА
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const project = await prisma.project.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  const project = await getProjectBySlug(resolvedParams.slug);
 
   if (!project) return { title: "Projekt nenájdený | Beton-SK" };
 
@@ -49,9 +47,7 @@ export default async function ProjectPage({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
 
-  const project = await prisma.project.findUnique({
-    where: { slug: slug },
-  });
+  const project = await getProjectBySlug(slug);
 
   if (!project) notFound();
   const seo = await getSeo("project", project.id);
@@ -116,9 +112,9 @@ export default async function ProjectPage({ params }) {
             <div className="lg:col-span-4 relative z-10">
               <div className="relative bg-white p-8 md:p-10 rounded-[2px] shadow-xl transition-shadow duration-[800ms] hover:shadow-2xl overflow-hidden flex flex-col h-full">
                 
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 border-b border-slate-100 pb-4 mb-10">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 border-b border-slate-100 pb-4 mb-10">
                   Technické údaje
-                </h3>
+                </h2>
                 
                 <div className="space-y-8 flex-1 relative z-10">
                   <div className="flex items-start gap-4 group/item">

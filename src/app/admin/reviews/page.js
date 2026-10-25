@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { approveReview, deleteReview, getReviewsAction } from "@/actions/reviewActions";
 import { Trash2, Check, Clock, Star, MessageSquare, ShieldCheck, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -9,20 +9,14 @@ export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadReviews = useCallback(async () => {
-    try {
-      const data = await getReviewsAction();
-      setReviews(data || []);
-    } catch (err) {
-      console.error("Failed to load reviews:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    loadReviews();
-  }, [loadReviews]);
+    let active = true;
+    getReviewsAction()
+      .then((data) => { if (active) setReviews(data || []); })
+      .catch((error) => { if (active) console.error("Failed to load reviews:", error); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleApprove = async (id) => {
     const res = await approveReview(id);
@@ -146,12 +140,12 @@ export default function AdminReviewsPage() {
                         ))}
                       </div>
                       <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest">
-                        // Log_Date: {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('sk-SK') : "---"}
+                        {"// Log_Date: "}{rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('sk-SK') : "---"}
                       </span>
                     </div>
                     
                     <p className="text-slate-700 text-xl md:text-2xl leading-relaxed italic font-medium pr-10">
-                      "{rev.text}"
+                      &quot;{rev.text}&quot;
                     </p>
                   </div>
 

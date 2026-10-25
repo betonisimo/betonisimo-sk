@@ -18,7 +18,7 @@ export default function AnalyticsManager({ initialValue }) {
     <div className="bg-white p-8 md:p-10 border-t border-slate-100">
       <div className="mb-6 border-l-4 border-[#dc2626] pl-6">
         <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-900">Analytics Tracking</h2>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">// Global_Scripts / Pixel_Management</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-3">{"// Global_Scripts / Pixel_Management"}</p>
       </div>
       <textarea
         className="w-full h-64 p-4 font-mono text-xs border border-slate-200 focus:border-[#dc2626] outline-none transition-colors"

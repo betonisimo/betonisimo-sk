@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import useEmblaCarousel from "embla-carousel-react";
@@ -44,10 +45,10 @@ export default function ProjectGallery({ images, title, imageAlts = {} }) {
             <div className="flex items-end justify-between px-2">
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Galéria projektu</h3>
                 <div className="flex gap-2">
-                    <button onClick={scrollPrev} className="p-3 !rounded-[2px] bg-white text-black shadow-md hover:bg-black hover:text-white transition-colors duration-300 border border-slate-100">
+                    <button aria-label="Predchádzajúce fotografie" onClick={scrollPrev} className="p-3 !rounded-[2px] bg-white text-black shadow-md hover:bg-black hover:text-white transition-colors duration-300 border border-slate-100">
                         <ChevronLeft size={20} />
                     </button>
-                    <button onClick={scrollNext} className="p-3 !rounded-[2px] bg-white text-black shadow-md hover:bg-black hover:text-white transition-colors duration-300 border border-slate-100">
+                    <button aria-label="Nasledujúce fotografie" onClick={scrollNext} className="p-3 !rounded-[2px] bg-white text-black shadow-md hover:bg-black hover:text-white transition-colors duration-300 border border-slate-100">
                         <ChevronRight size={20} />
                     </button>
                 </div>
@@ -59,7 +60,7 @@ export default function ProjectGallery({ images, title, imageAlts = {} }) {
                     {parsedImages.map((src, i) => (
                         <div key={i} className="flex-[0_0_85%] md:flex-[0_0_45%] lg:flex-[0_0_31%] min-w-0 pl-4 relative group">
                             <div className="relative aspect-video !rounded-[2px] overflow-hidden shadow-md group-hover:shadow-2xl transition-shadow duration-[800ms] bg-slate-900">
-                                <img src={src} alt={imageAlts[src] || `${title} - ${i + 1}`} className="w-full h-full object-cover filter  transition-all duration-[800ms] group-hover:!-0 group-hover:scale-110" />
+                                <Image fill sizes="(max-width: 767px) 85vw, (max-width: 1023px) 45vw, 420px" src={src} alt={imageAlts[src] || `${title} - ${i + 1}`} className="w-full h-full object-cover filter  transition-all duration-[800ms] group-hover:!-0 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-70 transition-opacity duration-[800ms] group-hover:opacity-0" />
                                 <button aria-label={`Zväčšiť fotografiu ${i + 1}`} onClick={() => setIndex(i)} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-[800ms] flex items-center justify-center">
                                     <div className="bg-black/60 p-4 !rounded-[2px] border border-white/20 backdrop-blur-sm hover:bg-[#dc2626] transition-all">
