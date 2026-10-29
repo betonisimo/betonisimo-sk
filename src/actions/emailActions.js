@@ -59,7 +59,7 @@ export async function sendContactEmail(formData) {
     const { error } = await resend.emails.send({
       from: 'Web Dopyt <onboarding@resend.dev>', 
       // ВАЖНО: Только на этот email, пока не подтвердишь домен!
-      to: ['betonisimo.sk@gmail.com'], 
+      to: ['betonissimo.sk@gmail.com'],
       subject: `Nová správa od: ${data.name}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">

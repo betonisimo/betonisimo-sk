@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { getSeoMany, seoSection, writeSeo } from "@/lib/seo";
 import { COLLECTION_SPECIFICATIONS_PREFIX, collectionSpecificationsSection, parseCollectionSpecifications } from "@/lib/collection-specifications";
+import { CATALOG_PATHS, URL_TAKEN, catalogTransaction, prepareCatalogUrl, rememberCatalogUrls } from "@/lib/catalog-urls";
 
 /**
  * СОХРАНЕНИЕ ОБЩЕГО КОНТЕНТА (Hero, Footer, About и т.д.)
@@ -68,6 +69,12 @@ function refreshItem(kind, slug) {
   revalidatePath("/");
   revalidatePath(kind === "project" ? "/realizacie" : itemPaths[kind]);
   if (slug) revalidatePath(`${itemPaths[kind]}/${slug}`);
+  if (Object.hasOwn(CATALOG_PATHS, kind)) revalidatePath(`${itemPaths[kind]}/[slug]`, "page");
+  if (kind === "collection") {
+    revalidatePath("/[citySlug]", "page");
+    revalidatePath("/admin/city-pages/new");
+    revalidatePath("/admin/city-pages/[id]", "page");
+  }
   revalidatePath("/admin/editor");
   revalidatePath("/sitemap.xml");
 }
@@ -78,15 +85,19 @@ async function saveItem(kind, id, input) {
     const data = kind === "project" ? cleanProject(input) : cleanCatalog(input, kind);
     const specifications = kind === "collection" ? parseCollectionSpecifications(input) : undefined;
     const itemId = id == null ? null : validId(id);
-    if (itemId == null) {
+    const isCatalog = Object.hasOwn(CATALOG_PATHS, kind);
+    if (itemId == null && !isCatalog) {
       const base = data.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || kind;
       let slug = base;
       let suffix = 2;
       while (await prisma[kind].findUnique({ where: { slug }, select: { id: true } })) slug = `${base}-${suffix++}`;
       data.slug = slug;
     }
-    const item = await prisma.$transaction(async (tx) => {
+    const persist = async (tx) => {
+      const url = isCatalog ? await prepareCatalogUrl(tx, kind, { id: itemId, title: data.title }) : null;
+      if (url) data.slug = url.slug;
       const saved = itemId == null ? await tx[kind].create({ data }) : await tx[kind].update({ where: { id: itemId }, data });
+      if (url) await rememberCatalogUrls(tx, kind, saved.id, [url.previousSlug, saved.slug]);
       if (specifications) {
         const sekcia = collectionSpecificationsSection(saved.id);
         await tx.strankaObsah.upsert({
@@ -97,13 +108,16 @@ async function saveItem(kind, id, input) {
       }
       await writeSeo(tx, kind, saved.id, input, kind === "project" ? [data.mainImage, ...data.images] : data.gallery);
       return saved;
-    });
+    };
+    const item = isCatalog ? await catalogTransaction(prisma, persist) : await prisma.$transaction(persist);
     refreshItem(kind, item.slug);
     return { success: true, data: { id: item.id, slug: item.slug } };
   } catch (error) {
     if (error.code) {
       console.error("Item save failed:", error.code);
-      return { success: false, error: error.code === "P2002" ? "Záznam s touto adresou už existuje. Skúste uloženie znova." : "Záznam sa nepodarilo uložiť. Skontrolujte databázu a skúste znova." };
+      return { success: false, error: error.code === "P2002"
+        ? Object.hasOwn(CATALOG_PATHS, kind) ? URL_TAKEN : "Záznam s touto adresou už existuje. Skúste uloženie znova."
+        : "Záznam sa nepodarilo uložiť. Skontrolujte databázu a skúste znova." };
     }
     return { success: false, error: error.message || "Záznam sa nepodarilo uložiť." };
   }

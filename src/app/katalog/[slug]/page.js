@@ -6,6 +6,8 @@ import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
 import { getSeo, imageAlt } from "@/lib/seo";
 import { collectionSpecificationsSection, resolveCollectionSpecifications } from "@/lib/collection-specifications";
+import { getVzoryFaq } from "@/lib/faq-data";
+import VzoryFaq from "@/components/catalog/VzoryFaq";
 
 // 1. АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ МЕТАДАННЫХ ДЛЯ КАЖДОГО СТИЛЯ
 export async function generateMetadata({ params }) {
@@ -46,12 +48,14 @@ export default async function CollectionPage({ params }) {
   const collection = await getCollectionBySlug(slug);
 
   if (!collection) notFound();
-  const [seo, benefitsData, storedSpecifications] = await Promise.all([
+  const [seo, benefitsData, storedSpecifications, faq] = await Promise.all([
     getSeo("collection", collection.id),
     getContent("global", "vyhody"),
     getContent("collection", collectionSpecificationsSection(collection.id)),
+    getVzoryFaq(),
   ]);
   const specifications = resolveCollectionSpecifications(storedSpecifications, benefitsData);
+  const hasFaq = faq.items.length > 0;
 
   // Собираем картинки
   const allImages = collection.gallery?.length > 0
@@ -59,8 +63,8 @@ export default async function CollectionPage({ params }) {
     : [collection.mainImage || "/og-image.jpg"];
 
   return (
-      <div className="bg-[#f8fafc] min-h-screen lg:h-screen pt-24 pb-8 selection:bg-red-100 font-sans lg:overflow-hidden flex flex-col">
-        <div className="max-w-[1600px] w-full mx-auto px-6 lg:px-8 flex-1 flex flex-col h-full">
+      <div className={`bg-[#f8fafc] min-h-screen pt-24 pb-8 selection:bg-red-100 font-sans flex flex-col ${hasFaq ? "" : "lg:h-screen lg:overflow-hidden"}`}>
+        <div className={`max-w-[1600px] w-full mx-auto px-6 lg:px-8 flex flex-col ${hasFaq ? "" : "flex-1 h-full"}`}>
 
           {/* NAVIGÁCIA - Industrial Style */}
           <Link
@@ -72,15 +76,15 @@ export default async function CollectionPage({ params }) {
           </Link>
 
           {/* SPLIT SCREEN LAYOUT */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 flex-1 h-full min-h-0">
+          <div className={`flex flex-col lg:flex-row gap-8 lg:gap-16 min-h-0 ${hasFaq ? "lg:items-start" : "flex-1 h-full"}`}>
 
             {/* LAVA ČASŤ: Галерея (Слайдер) */}
-            <div className="lg:w-[55%] xl:w-[60%] h-[60vh] lg:h-full min-h-0 flex flex-col mb-4 lg:mb-0">
+            <div className={`lg:w-[55%] xl:w-[60%] h-[60vh] min-h-0 flex flex-col mb-4 lg:mb-0 ${hasFaq ? "lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)]" : "lg:h-full"}`}>
               <CollectionGallery images={allImages} title={collection.title} imageAlts={seo.imageAlts || {}} />
             </div>
 
             {/* PRAVÁ ČASŤ: Контент */}
-            <div className="lg:w-[45%] xl:w-[40%] h-auto lg:h-full overflow-y-visible lg:overflow-y-auto pr-0 lg:pr-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent pb-10">
+            <div className={`lg:w-[45%] xl:w-[40%] h-auto pr-0 lg:pr-4 pb-10 ${hasFaq ? "" : "lg:h-full overflow-y-visible lg:overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"}`}>
 
               <div className="space-y-10">
                 {/* Заголовок */}
@@ -143,6 +147,7 @@ export default async function CollectionPage({ params }) {
             </div>
 
           </div>
+          <VzoryFaq faq={faq} />
         </div>
       </div>
   );

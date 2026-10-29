@@ -88,6 +88,10 @@ test("sitemap includes only published blog posts and does not disguise database 
       return [];
     },
   }]));
+  db.strankaObsah = { findMany: async (query) => {
+    assert.deepEqual(query.where, { stranka: "seo-city-page", obsah: { path: ["status"], equals: "PUBLISHED" } });
+    return [];
+  } };
   assert.equal((await loadSitemap(db)).length, 6);
   db.collection.findMany = async () => { throw new Error("database unavailable"); };
   await assert.rejects(loadSitemap(db), /database unavailable/);

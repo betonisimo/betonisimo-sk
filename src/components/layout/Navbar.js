@@ -8,10 +8,10 @@ const navLinks = [
   { name: "O nás", href: "/#onas" },
   { name: "Služby", href: "/#sluzby" },
   { name: "Realizácie", href: "/realizacie" },
-  { name: "Kontakt", href: "/kontakt" },
-  { name: "Vzory", href: "/katalog" },
   { name: "Doplnky", href: "/doplnky" },
   { name: "Blog", href: "/blog" },
+  { name: "Vzory", href: "/katalog" },
+  { name: "Kontakt", href: "/kontakt" },
 ];
 
 const Navbar = ({ phone = "0911 640 097", showPhone = true }) => {

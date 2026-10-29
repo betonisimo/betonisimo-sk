@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Phone, Home, Newspaper } from "lucide-react";
+import { LayoutDashboard, Phone, Home, Newspaper, CircleHelp, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboard() {
@@ -27,6 +27,20 @@ export default async function AdminDashboard() {
       icon: <Newspaper size={24} />,
       href: "/admin/blog",
       color: "bg-slate-900"
+    },
+    {
+      title: "SEO stránky miest",
+      desc: "Stránky pre mestá, vlastné URL, texty, fotografie a duplikovanie",
+      icon: <MapPin size={24} />,
+      href: "/admin/city-pages",
+      color: "bg-emerald-700"
+    },
+    {
+      title: "FAQ pre vzory",
+      desc: "Spoločné otázky a odpovede zobrazené pri každom vzore",
+      icon: <CircleHelp size={24} />,
+      href: "/admin/faq",
+      color: "bg-slate-700"
     }
   ];
 
