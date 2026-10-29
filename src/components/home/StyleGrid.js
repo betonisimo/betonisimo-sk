@@ -68,7 +68,7 @@ export default function StyleGrid({ collections, limit, headingLevel = 2 }) {
                 </p>
 
                 <ul className="space-y-2 mb-6">
-                  {["Individuálne riešenie", "Dlhá životnosť", "Top kvalita"].map((text, i) => (
+                  {["Individuálne riešenie", "Dlhá životnosť", "Top kvalita", "Vlastná výroba na Slovensku"].map((text, i) => (
                     <li key={i} className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest text-white/80">
                       <div className="flex items-center justify-center w-3 h-3 bg-[#dc2626] text-white rounded-[1px] shrink-0">
                         <Check size={8} strokeWidth={4} />

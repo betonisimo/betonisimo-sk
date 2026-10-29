@@ -2,7 +2,7 @@ import { getCollectionBySlug } from "@/lib/public-data";
 import { notFound } from "next/navigation";
 import { getContent } from "@/actions/adminActions";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Zap } from "lucide-react";
+import { ArrowLeft, Factory, ShieldCheck, Zap } from "lucide-react";
 import CollectionGallery from "@/components/catalog/CollectionGallery"; // Убедись, что путь правильный
 import { getSeo, imageAlt } from "@/lib/seo";
 import { collectionSpecificationsSection, resolveCollectionSpecifications } from "@/lib/collection-specifications";
@@ -101,6 +101,11 @@ export default async function CollectionPage({ params }) {
                 </div>
 
                 {/* Описание */}
+                <p className="flex w-fit max-w-full items-center gap-2 rounded-[2px] border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700">
+                  <Factory size={18} aria-hidden="true" className="shrink-0 text-[#dc2626]" />
+                  Vlastná výroba na Slovensku
+                </p>
+
                 <div className="prose prose-slate max-w-none">
                   {/* whitespace-pre-wrap сохраняет абзацы из базы */}
                   <p className="text-lg text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
